@@ -1,7 +1,7 @@
 ---
 name: REFACTOR
 about: Template for REFACTOR Issues.
-title: "[#XX] REFACTOR:"
+title: "[#XX] REFACTOR: Issue Name"
 labels: refactor
 assignees: ''
 

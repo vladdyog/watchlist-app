@@ -1,7 +1,7 @@
 ---
 name: STORY
 about: Template for STORY Issues.
-title: "[#XX] STORY:"
+title: "[#XX] STORY: Issue Name"
 labels: story
 assignees: ''
 
