@@ -1,7 +1,7 @@
 ---
 name: BUG
 about: Template for BUG Issues.
-title: "[#XX] BUG: Issue Name"
+title: ''
 labels: bug
 assignees: ''
 
