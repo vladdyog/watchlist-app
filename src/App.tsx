@@ -1,11 +1,11 @@
-import React from 'react'
+import React from "react";
 
 const App: React.FC = () => {
   return (
     <div>
       <h1>Watchlist App</h1>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

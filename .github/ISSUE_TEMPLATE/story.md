@@ -3,8 +3,7 @@ name: STORY
 about: Template for STORY Issues.
 title: ''
 labels: story
-assignees: ''
-
+assignees: ""
 ---
 
 ### Preamble

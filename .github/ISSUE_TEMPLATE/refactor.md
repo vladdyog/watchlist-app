@@ -3,8 +3,7 @@ name: REFACTOR
 about: Template for REFACTOR Issues.
 title: ''
 labels: refactor
-assignees: ''
-
+assignees: ""
 ---
 
 ### Preamble
