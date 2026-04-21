@@ -1,7 +1,7 @@
 ---
 name: STORY
 about: Template for STORY Issues.
-title: ''
+title: ""
 labels: story
 assignees: ""
 ---

@@ -1,7 +1,7 @@
 ---
 name: BUG
 about: Template for BUG Issues.
-title: ''
+title: ""
 labels: bug
 assignees: ""
 ---
