@@ -3,8 +3,7 @@ name: STORY
 about: Template for STORY Issues.
 title: "[#XX] STORY: Issue Name"
 labels: story
-assignees: ''
-
+assignees: ""
 ---
 
 ### Preamble

@@ -3,8 +3,7 @@ name: BUG
 about: Template for BUG Issues.
 title: "[#XX] BUG: Issue Name"
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 ## Description
