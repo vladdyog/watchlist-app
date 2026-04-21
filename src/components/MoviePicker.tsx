@@ -1,18 +1,18 @@
-import React, { useState } from 'react'
-import type { Movie } from '../types'
+import React, { useState } from "react";
+import type { Movie } from "../types";
 
 type Props = {
-  movies: Movie[]
-}
+  movies: Movie[];
+};
 
 const MoviePicker: React.FC<Props> = ({ movies }) => {
-  const [selected, setSelected] = useState<Movie | null>(null)
+  const [selected, setSelected] = useState<Movie | null>(null);
 
   const pickRandom = () => {
-    if (movies.length === 0) return
-    const index = Math.floor(Math.random() * movies.length)
-    setSelected(movies[index])
-  }
+    if (movies.length === 0) return;
+    const index = Math.floor(Math.random() * movies.length);
+    setSelected(movies[index]);
+  };
 
   return (
     <div>
@@ -25,11 +25,11 @@ const MoviePicker: React.FC<Props> = ({ movies }) => {
       {selected && (
         <p>
           {selected.title}
-          {selected.year ? ` (${selected.year})` : ''}
+          {selected.year ? ` (${selected.year})` : ""}
         </p>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default MoviePicker
+export default MoviePicker;
