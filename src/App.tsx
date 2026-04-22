@@ -1,11 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CSVUpload from "./components/CSVUpload";
 import MoviePicker from "./components/MoviePicker";
 import type { Movie } from "./types";
 
+const STORAGE_KEY = "watchlist";
+
+function loadMovies(): Movie[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as Movie[];
+  } catch {
+    return [];
+  }
+}
+
+function saveMovies(movies: Movie[]): void {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(movies));
+}
+
 const App: React.FC = () => {
-  const [movies, setMovies] = useState<Movie[]>([]);
+  const [movies, setMovies] = useState<Movie[]>(loadMovies);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    saveMovies(movies);
+  }, [movies]);
 
   return (
     <div>
