@@ -19,7 +19,7 @@ const MoviePicker: React.FC<Props> = ({ movies }) => {
       {movies.length === 0 ? (
         <p>No movies loaded yet.</p>
       ) : (
-        <button onClick={pickRandom}>Pick a movie</button>
+        <button onClick={pickRandom}>Pick a movie!</button>
       )}
 
       {selected && (
