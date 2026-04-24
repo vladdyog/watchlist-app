@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import CSVUpload from "./components/CSVUpload";
 import MoviePicker from "./components/MoviePicker";
+import MovieFilters from "./components/MovieFilters";
 import { enrichAllMovies } from "./utils/tmdb";
-import type { Movie } from "./types";
+import { filterMovies } from "./utils";
+import type { Movie, FilterOptions } from "./types";
 
 const STORAGE_KEY = "watchlist";
 const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN as string;
@@ -23,6 +25,7 @@ function saveMovies(movies: Movie[]): void {
 
 const App: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>(loadMovies);
+  const [filters, setFilters] = useState<FilterOptions>({});
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<{
     completed: number;
@@ -37,6 +40,7 @@ const App: React.FC = () => {
   const handleMoviesLoaded = async (rawMovies: Movie[]) => {
     setProgress({ completed: 0, total: rawMovies.length });
     setEnrichmentTime(null);
+    setFilters({});
     setError(null);
 
     const start = performance.now();
@@ -57,6 +61,7 @@ const App: React.FC = () => {
   };
 
   const isEnriching = progress !== null;
+  const filteredMovies = filterMovies(movies, filters);
 
   return (
     <div>
@@ -73,14 +78,21 @@ const App: React.FC = () => {
       )}
 
       {!isEnriching && movies.length > 0 && (
-        <p>{movies.length} movies loaded.</p>
+        <>
+          <p>
+            {filteredMovies.length} / {movies.length} movies match filters.
+          </p>
+          {enrichmentTime !== null && (
+            <p>Enrichment took {enrichmentTime.toFixed(2)}s</p>
+          )}
+          <MovieFilters
+            movies={movies}
+            filters={filters}
+            onChange={setFilters}
+          />
+          <MoviePicker movies={filteredMovies} />
+        </>
       )}
-
-      {enrichmentTime !== null && (
-        <p>Enrichment time: {enrichmentTime.toFixed(2)}s</p>
-      )}
-
-      <MoviePicker movies={isEnriching ? [] : movies} />
     </div>
   );
 };
