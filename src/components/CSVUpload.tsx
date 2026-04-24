@@ -31,7 +31,7 @@ const CSVUpload: React.FC<Props> = ({ onMoviesLoaded, onError }) => {
 
   return (
     <div>
-      <label htmlFor="csv-upload">Upload your watchlist CSV file:</label>
+      <label htmlFor="csv-upload">Upload your watchlist (CSV):</label>
       <input
         id="csv-upload"
         type="file"
