@@ -77,7 +77,7 @@ const App: React.FC = () => {
       )}
 
       {enrichmentTime !== null && (
-        <p>Enrichment took {enrichmentTime.toFixed(2)}s</p>
+        <p>Enrichment time: {enrichmentTime.toFixed(2)}s</p>
       )}
 
       <MoviePicker movies={isEnriching ? [] : movies} />
