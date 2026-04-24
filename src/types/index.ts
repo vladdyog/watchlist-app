@@ -4,5 +4,7 @@ export type Movie = {
   rating?: number;
   genres?: string[];
   runtime?: number;
+  overview?: string;
+  poster?: string;
   dateAdded?: string;
 };
