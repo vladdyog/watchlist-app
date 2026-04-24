@@ -44,7 +44,6 @@ const App: React.FC = () => {
   useEffect(() => {
     if (progress === null) saveToStorage(STORAGE_KEY, movies);
   }, [movies, progress]);
-
   useEffect(() => {
     saveToStorage(WHEEL_KEY, wheel);
   }, [wheel]);
@@ -54,9 +53,7 @@ const App: React.FC = () => {
     setEnrichmentTime(null);
     setFilters({});
     setError(null);
-
     const start = performance.now();
-
     const enriched = await enrichAllMovies(
       rawMovies,
       TMDB_TOKEN,
@@ -64,84 +61,219 @@ const App: React.FC = () => {
         setProgress({ completed, total });
       },
     );
-
-    const elapsed = (performance.now() - start) / 1000;
     setMovies(enriched);
     setProgress(null);
-    setEnrichmentTime(elapsed);
+    setEnrichmentTime((performance.now() - start) / 1000);
   };
 
   const handleMoviePicked = (movie: Movie) => {
     if (!wheelEnabled) return;
-    // Avoid duplicates on the wheel
     setWheel((prev) =>
       prev.some((m) => m.title === movie.title) ? prev : [...prev, movie],
     );
-  };
-
-  const handleRemoveFromWheel = (movie: Movie) => {
-    setWheel((prev) => prev.filter((m) => m.title !== movie.title));
   };
 
   const isEnriching = progress !== null;
   const filteredMovies = filterMovies(movies, filters);
 
   return (
-    <div>
-      <h1>Watchlist Movie Picker</h1>
-
-      <CSVUpload onMoviesLoaded={handleMoviesLoaded} onError={setError} />
-
-      {error && <p>{error}</p>}
-
-      {isEnriching && (
-        <p>
-          Enriching movies... {progress.completed} / {progress.total}
+    <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
+      {/* Header */}
+      <header
+        style={{
+          borderBottom: "1px solid var(--border)",
+          padding: "24px 0",
+          textAlign: "center",
+        }}
+      >
+        <h1
+          style={{
+            fontFamily: "DM Serif Display, serif",
+            fontSize: "2.25rem",
+            fontWeight: 400,
+            color: "var(--text)",
+            letterSpacing: "-0.01em",
+            margin: 0,
+          }}
+        >
+          🎬 Movie Picker
+        </h1>
+        <p
+          style={{
+            color: "var(--muted)",
+            margin: "6px 0 0",
+            fontSize: "0.875rem",
+          }}
+        >
+          Your watchlist. One random pick.
         </p>
-      )}
+      </header>
 
-      {!isEnriching && movies.length > 0 && (
-        <>
-          <p>
-            {filteredMovies.length} / {movies.length} movies match filters.
-          </p>
-          {enrichmentTime !== null && (
-            <p>Enrichment took {enrichmentTime.toFixed(2)}s</p>
+      {/* Main content */}
+      <main
+        style={{ maxWidth: "680px", margin: "0 auto", padding: "48px 24px" }}
+      >
+        {/* Upload section */}
+        <Section title="Watchlist">
+          <CSVUpload onMoviesLoaded={handleMoviesLoaded} onError={setError} />
+          {error && (
+            <p
+              style={{
+                color: "var(--danger)",
+                marginTop: "12px",
+                fontSize: "0.875rem",
+              }}
+            >
+              {error}
+            </p>
           )}
+          {isEnriching && (
+            <div style={{ marginTop: "16px" }}>
+              <p
+                style={{
+                  color: "var(--muted)",
+                  fontSize: "0.875rem",
+                  marginBottom: "8px",
+                }}
+              >
+                Enriching movies... {progress.completed} / {progress.total}
+              </p>
+              <div
+                style={{
+                  height: "2px",
+                  background: "var(--border)",
+                  borderRadius: "999px",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    height: "100%",
+                    width: `${(progress.completed / progress.total) * 100}%`,
+                    background: "var(--accent)",
+                    transition: "width 0.2s ease",
+                    borderRadius: "999px",
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          {!isEnriching && movies.length > 0 && (
+            <p
+              style={{
+                color: "var(--muted)",
+                fontSize: "0.875rem",
+                marginTop: "12px",
+              }}
+            >
+              {movies.length} movies loaded
+              {enrichmentTime !== null &&
+                ` · enriched in ${enrichmentTime.toFixed(1)}s`}
+            </p>
+          )}
+        </Section>
 
-          <MovieFilters
-            movies={movies}
-            filters={filters}
-            onChange={setFilters}
-          />
-
-          <MoviePicker
-            movies={filteredMovies}
-            onMoviePicked={handleMoviePicked}
-          />
-
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                checked={wheelEnabled}
-                onChange={(e) => setWheelEnabled(e.target.checked)}
+        {!isEnriching && movies.length > 0 && (
+          <>
+            {/* Filters section */}
+            <Section title="Filters">
+              <MovieFilters
+                movies={movies}
+                filters={filters}
+                onChange={setFilters}
               />
-              Enable wheel mode
-            </label>
-          </div>
+              <p
+                style={{
+                  color: "var(--muted)",
+                  fontSize: "0.875rem",
+                  marginTop: "12px",
+                }}
+              >
+                {filteredMovies.length} / {movies.length} movies match
+              </p>
+            </Section>
 
-          {wheelEnabled && (
-            <MovieWheel
-              movies={wheel}
-              onRemove={handleRemoveFromWheel}
-              onClear={() => setWheel([])}
-            />
-          )}
-        </>
-      )}
+            {/* Picker section */}
+            <Section title="Pick a Movie">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                  marginBottom: "16px",
+                }}
+              >
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    cursor: "pointer",
+                    fontSize: "0.875rem",
+                    color: "var(--muted)",
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={wheelEnabled}
+                    onChange={(e) => setWheelEnabled(e.target.checked)}
+                    style={{
+                      accentColor: "var(--accent)",
+                      width: "16px",
+                      height: "16px",
+                    }}
+                  />
+                  Enable wheel mode
+                </label>
+              </div>
+              <MoviePicker
+                movies={filteredMovies}
+                onMoviePicked={handleMoviePicked}
+              />
+            </Section>
+
+            {/* Wheel section */}
+            {wheelEnabled && (
+              <Section title="The Wheel">
+                <MovieWheel
+                  movies={wheel}
+                  onRemove={(m) =>
+                    setWheel((prev) => prev.filter((w) => w.title !== m.title))
+                  }
+                  onClear={() => setWheel([])}
+                />
+              </Section>
+            )}
+          </>
+        )}
+      </main>
     </div>
   );
 };
+
+// Reusable section wrapper
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
+  title,
+  children,
+}) => (
+  <section style={{ marginBottom: "48px" }}>
+    <h2
+      style={{
+        fontFamily: "DM Serif Display, serif",
+        fontSize: "1.1rem",
+        fontWeight: 400,
+        color: "var(--accent)",
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        marginBottom: "20px",
+        paddingBottom: "10px",
+        borderBottom: "1px solid var(--border)",
+      }}
+    >
+      {title}
+    </h2>
+    {children}
+  </section>
+);
 
 export default App;
