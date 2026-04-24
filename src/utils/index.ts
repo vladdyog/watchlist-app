@@ -11,10 +11,18 @@ function detectSource(headers: string[]): CSVSource {
   return "unknown";
 }
 
-function parseYear(raw: string | undefined): number | undefined {
-  if (!raw) return undefined;
-  const parsed = parseInt(raw, 10);
+function parseNumber(raw: string | undefined): number | undefined {
+  if (!raw || raw.trim() === "") return undefined;
+  const parsed = Number(raw);
   return isNaN(parsed) ? undefined : parsed;
+}
+
+function parseGenres(raw: string | undefined): string[] | undefined {
+  if (!raw || raw.trim() === "") return undefined;
+  return raw
+    .split(",")
+    .map((g) => g.trim())
+    .filter((g) => g !== "");
 }
 
 export function normalizeMovies(rows: Record<string, string>[]): Movie[] {
@@ -27,21 +35,30 @@ export function normalizeMovies(rows: Record<string, string>[]): Movie[] {
     .map((row) => {
       let title: string;
       let year: number | undefined;
+      let rating: number | undefined;
+      let genres: string[] | undefined;
+      let runtime: number | undefined;
+      let dateAdded: string | undefined;
 
       if (source === "imdb") {
         title = row["Title"] ?? "";
-        year = parseYear(row["Year"]);
+        year = parseNumber(row["Year"]);
+        rating = parseNumber(row["IMDb Rating"]);
+        genres = parseGenres(row["Genres"]);
+        runtime = parseNumber(row["Runtime (mins)"]);
+        dateAdded = row["Created"] ?? undefined;
       } else if (source === "letterboxd") {
         title = row["Name"] ?? "";
-        year = parseYear(row["Year"]);
+        year = parseNumber(row["Year"]);
+        // Letterboxd watchlist export does not include rating
+        dateAdded = row["Date"] ?? undefined;
       } else {
-        // unknown source: try common column names
         title =
           row["Title"] ?? row["title"] ?? row["Name"] ?? row["name"] ?? "";
-        year = parseYear(row["Year"] ?? row["year"]);
+        year = parseNumber(row["Year"] ?? row["year"]);
       }
 
-      return { title: title.trim(), year };
+      return { title: title.trim(), year, rating, genres, runtime, dateAdded };
     })
     .filter((movie) => movie.title !== "");
 }
@@ -69,4 +86,8 @@ export function parseCSV(file: File): Promise<ParseCSVResult> {
       },
     });
   });
+}
+
+export function formatRating(rating: number): string {
+  return rating.toFixed(1);
 }
