@@ -3,15 +3,18 @@ import type { Movie } from "../types";
 
 type Props = {
   movies: Movie[];
+  onMoviePicked?: (movie: Movie) => void;
 };
 
-const MoviePicker: React.FC<Props> = ({ movies }) => {
+const MoviePicker: React.FC<Props> = ({ movies, onMoviePicked }) => {
   const [selected, setSelected] = useState<Movie | null>(null);
 
   const pickRandom = () => {
     if (movies.length === 0) return;
     const index = Math.floor(Math.random() * movies.length);
-    setSelected(movies[index]);
+    const movie = movies[index];
+    setSelected(movie);
+    onMoviePicked?.(movie);
   };
 
   return (
@@ -19,7 +22,7 @@ const MoviePicker: React.FC<Props> = ({ movies }) => {
       {movies.length === 0 ? (
         <p>No movies loaded yet.</p>
       ) : (
-        <button onClick={pickRandom}>Pick a movie!</button>
+        <button onClick={pickRandom}>Pick a movie</button>
       )}
 
       {selected && (
