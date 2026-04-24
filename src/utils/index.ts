@@ -43,6 +43,52 @@ export function normalizeMovies(rows: Record<string, string>[]): Movie[] {
     .filter((movie) => movie.title !== "");
 }
 
+export function filterMovies(
+  movies: Movie[],
+  filters: import("../types").FilterOptions,
+): Movie[] {
+  return movies.filter((movie) => {
+    if (
+      filters.minRating !== undefined &&
+      (movie.rating ?? 0) < filters.minRating
+    )
+      return false;
+    if (
+      filters.minRuntime !== undefined &&
+      (movie.runtime ?? 0) < filters.minRuntime
+    )
+      return false;
+    if (
+      filters.maxRuntime !== undefined &&
+      (movie.runtime ?? Infinity) > filters.maxRuntime
+    )
+      return false;
+    if (filters.minYear !== undefined && (movie.year ?? 0) < filters.minYear)
+      return false;
+    if (
+      filters.maxYear !== undefined &&
+      (movie.year ?? Infinity) > filters.maxYear
+    )
+      return false;
+
+    if (filters.genres && filters.genres.length > 0) {
+      const movieGenres = movie.genres ?? [];
+      const hasGenre = filters.genres.some((g) => movieGenres.includes(g));
+      if (!hasGenre) return false;
+    }
+
+    if (filters.addedAfter && movie.dateAdded) {
+      if (movie.dateAdded < filters.addedAfter) return false;
+    }
+
+    if (filters.addedBefore && movie.dateAdded) {
+      if (movie.dateAdded > filters.addedBefore) return false;
+    }
+
+    return true;
+  });
+}
+
 export function formatRating(rating: number): string {
   return rating.toFixed(1);
 }

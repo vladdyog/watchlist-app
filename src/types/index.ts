@@ -8,3 +8,14 @@ export type Movie = {
   poster?: string;
   dateAdded?: string;
 };
+
+export type FilterOptions = {
+  minRating?: number;
+  genres?: string[];
+  minRuntime?: number;
+  maxRuntime?: number;
+  minYear?: number;
+  maxYear?: number;
+  addedAfter?: string;
+  addedBefore?: string;
+};
