@@ -6,19 +6,6 @@ type Props = {
   onMoviePicked?: (movie: Movie) => void;
 };
 
-const btn = (disabled: boolean): React.CSSProperties => ({
-  padding: "12px 32px",
-  background: disabled ? "var(--surface)" : "var(--accent)",
-  color: disabled ? "var(--muted)" : "#0f0f0f",
-  border: "none",
-  borderRadius: "6px",
-  fontSize: "0.9rem",
-  fontWeight: 500,
-  cursor: disabled ? "not-allowed" : "pointer",
-  fontFamily: "DM Sans, sans-serif",
-  transition: "background 0.15s",
-});
-
 const MoviePicker: React.FC<Props> = ({ movies, onMoviePicked }) => {
   const [selected, setSelected] = useState<Movie | null>(null);
 
@@ -30,63 +17,32 @@ const MoviePicker: React.FC<Props> = ({ movies, onMoviePicked }) => {
   };
 
   return (
-    <div>
+    <div className="space-y-5">
       {movies.length === 0 ? (
-        <p style={{ color: "var(--muted)", fontSize: "0.875rem" }}>
+        <p className="text-muted text-sm">
           No movies match the current filters.
         </p>
       ) : (
         <button
           onClick={pickRandom}
-          style={btn(false)}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.background = "var(--accent-hover)")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.background = "var(--accent)")
-          }
+          className="bg-accent hover:bg-accent-hover text-bg font-medium text-sm px-8 py-3 rounded-lg transition-colors duration-150 cursor-pointer"
         >
           Pick a movie
         </button>
       )}
 
       {selected && (
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "20px",
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-            borderRadius: "8px",
-            display: "flex",
-            gap: "20px",
-            alignItems: "flex-start",
-          }}
-        >
+        <div className="flex gap-5 bg-surface border border-border rounded-xl p-5">
           {selected.poster && (
             <img
               src={selected.poster}
               alt={selected.title}
-              style={{ width: "80px", borderRadius: "4px", flexShrink: 0 }}
+              className="w-20 rounded-md flex-shrink-0 object-cover"
             />
           )}
-          <div>
-            <p
-              style={{
-                fontFamily: "DM Serif Display, serif",
-                fontSize: "1.2rem",
-                margin: "0 0 4px",
-              }}
-            >
-              {selected.title}
-            </p>
-            <p
-              style={{
-                color: "var(--muted)",
-                fontSize: "0.8rem",
-                margin: "0 0 8px",
-              }}
-            >
+          <div className="space-y-1.5 min-w-0">
+            <p className="font-display text-xl text-text">{selected.title}</p>
+            <p className="text-muted text-xs">
               {[
                 selected.year,
                 selected.runtime && `${selected.runtime} min`,
@@ -96,26 +52,10 @@ const MoviePicker: React.FC<Props> = ({ movies, onMoviePicked }) => {
                 .join(" · ")}
             </p>
             {selected.genres && (
-              <p
-                style={{
-                  color: "var(--muted)",
-                  fontSize: "0.8rem",
-                  margin: "0 0 8px",
-                }}
-              >
-                {selected.genres.join(", ")}
-              </p>
+              <p className="text-muted text-xs">{selected.genres.join(", ")}</p>
             )}
             {selected.overview && (
-              <p
-                style={{
-                  fontSize: "0.85rem",
-                  lineHeight: 1.6,
-                  margin: 0,
-                  color: "var(--text)",
-                  opacity: 0.8,
-                }}
-              >
+              <p className="text-text/70 text-sm leading-relaxed pt-1">
                 {selected.overview}
               </p>
             )}

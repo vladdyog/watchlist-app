@@ -14,8 +14,7 @@ const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN as string;
 function loadFromStorage<T>(key: string): T | null {
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    return JSON.parse(raw) as T;
+    return raw ? (JSON.parse(raw) as T) : null;
   } catch {
     return null;
   }
@@ -57,9 +56,7 @@ const App: React.FC = () => {
     const enriched = await enrichAllMovies(
       rawMovies,
       TMDB_TOKEN,
-      (completed, total) => {
-        setProgress({ completed, total });
-      },
+      (completed, total) => setProgress({ completed, total }),
     );
     setMovies(enriched);
     setProgress(null);
@@ -77,162 +74,64 @@ const App: React.FC = () => {
   const filteredMovies = filterMovies(movies, filters);
 
   return (
-    <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
+    <div className="min-h-screen bg-bg">
       {/* Header */}
-      <header
-        style={{
-          borderBottom: "1px solid var(--border)",
-          padding: "24px 0",
-          textAlign: "center",
-        }}
-      >
-        <h1
-          style={{
-            fontFamily: "DM Serif Display, serif",
-            fontSize: "2.25rem",
-            fontWeight: 400,
-            color: "var(--text)",
-            letterSpacing: "-0.01em",
-            margin: 0,
-          }}
-        >
-          🎬 Movie Picker
+      <header className="border-b border-border py-6 text-center">
+        <h1 className="font-display text-4xl font-normal text-text tracking-tight">
+          Movie Picker
         </h1>
-        <p
-          style={{
-            color: "var(--muted)",
-            margin: "6px 0 0",
-            fontSize: "0.875rem",
-          }}
-        >
+        <p className="text-muted text-sm mt-1.5">
           Your watchlist. One random pick.
         </p>
       </header>
 
-      {/* Main content */}
-      <main
-        style={{ maxWidth: "680px", margin: "0 auto", padding: "48px 24px" }}
-      >
-        {/* Upload section */}
+      {/* Content */}
+      <main className="max-w-2xl mx-auto px-6 py-12 space-y-12">
+        {/* Upload */}
         <Section title="Watchlist">
-          <CSVUpload onMoviesLoaded={handleMoviesLoaded} onError={setError} />
-          {error && (
-            <p
-              style={{
-                color: "var(--danger)",
-                marginTop: "12px",
-                fontSize: "0.875rem",
-              }}
-            >
-              {error}
-            </p>
-          )}
-          {isEnriching && (
-            <div style={{ marginTop: "16px" }}>
-              <p
-                style={{
-                  color: "var(--muted)",
-                  fontSize: "0.875rem",
-                  marginBottom: "8px",
-                }}
-              >
-                Enriching movies... {progress.completed} / {progress.total}
-              </p>
-              <div
-                style={{
-                  height: "2px",
-                  background: "var(--border)",
-                  borderRadius: "999px",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    height: "100%",
-                    width: `${(progress.completed / progress.total) * 100}%`,
-                    background: "var(--accent)",
-                    transition: "width 0.2s ease",
-                    borderRadius: "999px",
-                  }}
-                />
-              </div>
-            </div>
-          )}
-          {!isEnriching && movies.length > 0 && (
-            <p
-              style={{
-                color: "var(--muted)",
-                fontSize: "0.875rem",
-                marginTop: "12px",
-              }}
-            >
-              {movies.length} movies loaded
-              {enrichmentTime !== null &&
-                ` · enriched in ${enrichmentTime.toFixed(1)}s`}
-            </p>
-          )}
+          <CSVUpload
+            movieCount={movies.length}
+            isEnriching={isEnriching}
+            progress={progress}
+            enrichmentTime={enrichmentTime}
+            onMoviesLoaded={handleMoviesLoaded}
+            onError={setError}
+          />
+          {error && <p className="text-danger text-sm mt-3">{error}</p>}
         </Section>
 
         {!isEnriching && movies.length > 0 && (
           <>
-            {/* Filters section */}
+            {/* Filters */}
             <Section title="Filters">
               <MovieFilters
                 movies={movies}
                 filters={filters}
                 onChange={setFilters}
               />
-              <p
-                style={{
-                  color: "var(--muted)",
-                  fontSize: "0.875rem",
-                  marginTop: "12px",
-                }}
-              >
+              <p className="text-muted text-sm mt-3">
                 {filteredMovies.length} / {movies.length} movies match
               </p>
             </Section>
 
-            {/* Picker section */}
+            {/* Picker */}
             <Section title="Pick a Movie">
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                  marginBottom: "16px",
-                }}
-              >
-                <label
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    cursor: "pointer",
-                    fontSize: "0.875rem",
-                    color: "var(--muted)",
-                  }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={wheelEnabled}
-                    onChange={(e) => setWheelEnabled(e.target.checked)}
-                    style={{
-                      accentColor: "var(--accent)",
-                      width: "16px",
-                      height: "16px",
-                    }}
-                  />
-                  Enable wheel mode
-                </label>
-              </div>
+              <label className="flex items-center gap-2 text-sm text-muted cursor-pointer mb-4">
+                <input
+                  type="checkbox"
+                  checked={wheelEnabled}
+                  onChange={(e) => setWheelEnabled(e.target.checked)}
+                  className="accent-accent w-4 h-4"
+                />
+                Enable wheel mode
+              </label>
               <MoviePicker
                 movies={filteredMovies}
                 onMoviePicked={handleMoviePicked}
               />
             </Section>
 
-            {/* Wheel section */}
+            {/* Wheel */}
             {wheelEnabled && (
               <Section title="The Wheel">
                 <MovieWheel
@@ -251,25 +150,12 @@ const App: React.FC = () => {
   );
 };
 
-// Reusable section wrapper
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
   children,
 }) => (
-  <section style={{ marginBottom: "48px" }}>
-    <h2
-      style={{
-        fontFamily: "DM Serif Display, serif",
-        fontSize: "1.1rem",
-        fontWeight: 400,
-        color: "var(--accent)",
-        letterSpacing: "0.08em",
-        textTransform: "uppercase",
-        marginBottom: "20px",
-        paddingBottom: "10px",
-        borderBottom: "1px solid var(--border)",
-      }}
-    >
+  <section>
+    <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest mb-5 pb-2.5 border-b border-border">
       {title}
     </h2>
     {children}

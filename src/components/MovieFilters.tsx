@@ -11,32 +11,18 @@ function getUniqueGenres(movies: Movie[]): string[] {
   return Array.from(new Set(movies.flatMap((m) => m.genres ?? []))).sort();
 }
 
-const inputStyle: React.CSSProperties = {
-  background: "var(--surface)",
-  border: "1px solid var(--border)",
-  borderRadius: "6px",
-  color: "var(--text)",
-  padding: "8px 12px",
-  fontSize: "0.875rem",
-  width: "120px",
-  fontFamily: "DM Sans, sans-serif",
-};
+const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (
+  props,
+) => (
+  <input
+    {...props}
+    className="bg-surface border border-border rounded-md text-text text-sm px-3 py-2 w-full placeholder:text-muted focus:outline-none focus:border-accent transition-colors duration-150"
+  />
+);
 
-const labelStyle: React.CSSProperties = {
-  fontSize: "0.75rem",
-  color: "var(--muted)",
-  textTransform: "uppercase",
-  letterSpacing: "0.06em",
-  display: "block",
-  marginBottom: "6px",
-};
-
-const filterRow: React.CSSProperties = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "24px",
-  marginBottom: "20px",
-};
+const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <p className="text-muted text-xs uppercase tracking-wider mb-2">{children}</p>
+);
 
 const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
   const genres = getUniqueGenres(movies);
@@ -57,11 +43,12 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
   );
 
   return (
-    <div>
-      <div style={filterRow}>
-        <div>
-          <label style={labelStyle}>Min rating</label>
-          <input
+    <div className="space-y-5">
+      {/* Row 1: Rating + Runtime + Year */}
+      <div className="flex flex-wrap gap-5">
+        <div className="w-28">
+          <Label>Min rating</Label>
+          <Input
             type="number"
             min={0}
             max={10}
@@ -73,17 +60,17 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
                 minRating: e.target.value ? Number(e.target.value) : undefined,
               })
             }
-            style={inputStyle}
           />
         </div>
 
         <div>
-          <label style={labelStyle}>Runtime (min)</label>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <input
+          <Label>Runtime (min)</Label>
+          <div className="flex gap-2">
+            <Input
               type="number"
               min={0}
               placeholder="Min"
+              style={{ width: "80px" }}
               value={filters.minRuntime ?? ""}
               onChange={(e) =>
                 set({
@@ -92,12 +79,12 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
                     : undefined,
                 })
               }
-              style={{ ...inputStyle, width: "80px" }}
             />
-            <input
+            <Input
               type="number"
               min={0}
               placeholder="Max"
+              style={{ width: "80px" }}
               value={filters.maxRuntime ?? ""}
               onChange={(e) =>
                 set({
@@ -106,81 +93,77 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
                     : undefined,
                 })
               }
-              style={{ ...inputStyle, width: "80px" }}
             />
           </div>
         </div>
 
         <div>
-          <label style={labelStyle}>Year</label>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <input
+          <Label>Year</Label>
+          <div className="flex gap-2">
+            <Input
               type="number"
               placeholder="From"
+              style={{ width: "90px" }}
               value={filters.minYear ?? ""}
               onChange={(e) =>
                 set({
                   minYear: e.target.value ? Number(e.target.value) : undefined,
                 })
               }
-              style={{ ...inputStyle, width: "90px" }}
             />
-            <input
+            <Input
               type="number"
               placeholder="To"
+              style={{ width: "90px" }}
               value={filters.maxYear ?? ""}
               onChange={(e) =>
                 set({
                   maxYear: e.target.value ? Number(e.target.value) : undefined,
                 })
               }
-              style={{ ...inputStyle, width: "90px" }}
-            />
-          </div>
-        </div>
-
-        <div>
-          <label style={labelStyle}>Added to watchlist</label>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <input
-              type="date"
-              value={filters.addedAfter ?? ""}
-              onChange={(e) => set({ addedAfter: e.target.value || undefined })}
-              style={{ ...inputStyle, width: "auto" }}
-            />
-            <input
-              type="date"
-              value={filters.addedBefore ?? ""}
-              onChange={(e) =>
-                set({ addedBefore: e.target.value || undefined })
-              }
-              style={{ ...inputStyle, width: "auto" }}
             />
           </div>
         </div>
       </div>
 
+      {/* Row 2: Date added */}
+      <div>
+        <Label>Added to watchlist</Label>
+        <div className="flex gap-2">
+          <Input
+            type="date"
+            value={filters.addedAfter ?? ""}
+            onChange={(e) => set({ addedAfter: e.target.value || undefined })}
+            style={{ width: "auto" }}
+          />
+          <Input
+            type="date"
+            value={filters.addedBefore ?? ""}
+            onChange={(e) => set({ addedBefore: e.target.value || undefined })}
+            style={{ width: "auto" }}
+          />
+        </div>
+      </div>
+
+      {/* Row 3: Genres */}
       {genres.length > 0 && (
         <div>
-          <label style={labelStyle}>Genres</label>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+          <Label>Genres</Label>
+          <div className="flex flex-wrap gap-2">
             {genres.map((genre) => {
               const active = (filters.genres ?? []).includes(genre);
               return (
                 <button
                   key={genre}
                   onClick={() => toggleGenre(genre)}
-                  style={{
-                    padding: "4px 12px",
-                    borderRadius: "999px",
-                    fontSize: "0.8rem",
-                    cursor: "pointer",
-                    fontFamily: "DM Sans, sans-serif",
-                    border: `1px solid ${active ? "var(--accent)" : "var(--border)"}`,
-                    background: active ? "var(--accent)" : "transparent",
-                    color: active ? "#0f0f0f" : "var(--muted)",
-                    transition: "all 0.15s",
-                  }}
+                  className={`
+                    px-3 py-1 rounded-full text-xs border transition-all duration-150 cursor-pointer
+                    ${
+                      active
+                        ? "bg-accent border-accent text-bg"
+                        : "bg-transparent border-border text-muted hover:border-accent/50"
+                    }
+                  `}
                 >
                   {genre}
                 </button>
@@ -190,20 +173,11 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
         </div>
       )}
 
+      {/* Reset */}
       {isActive && (
         <button
           onClick={() => onChange({})}
-          style={{
-            marginTop: "16px",
-            padding: "6px 14px",
-            background: "transparent",
-            border: "1px solid var(--border)",
-            borderRadius: "6px",
-            color: "var(--muted)",
-            fontSize: "0.8rem",
-            cursor: "pointer",
-            fontFamily: "DM Sans, sans-serif",
-          }}
+          className="text-muted text-xs border border-border rounded-md px-3 py-1.5 hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
         >
           Reset filters
         </button>
