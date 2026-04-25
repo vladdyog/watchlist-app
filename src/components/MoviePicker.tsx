@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import MovieCard from "./MovieCard";
+import MovieModal from "./MovieModal";
 import type { Movie } from "../types";
 
 type Props = {
@@ -8,60 +11,62 @@ type Props = {
 
 const MoviePicker: React.FC<Props> = ({ movies, onMoviePicked }) => {
   const [selected, setSelected] = useState<Movie | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   const pickRandom = () => {
     if (movies.length === 0) return;
     const movie = movies[Math.floor(Math.random() * movies.length)];
     setSelected(movie);
+    setShowModal(true);
     onMoviePicked?.(movie);
   };
 
   return (
-    <div className="space-y-5">
+    <div className="flex flex-col items-center gap-6 py-4">
       {movies.length === 0 ? (
         <p className="text-muted text-sm">
           No movies match the current filters.
         </p>
       ) : (
-        <button
+        <motion.button
           onClick={pickRandom}
-          className="bg-accent hover:bg-accent-hover text-bg font-medium text-sm px-8 py-3 rounded-lg transition-colors duration-150 cursor-pointer"
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+          className="bg-accent text-bg font-medium text-base px-12 py-4 rounded-full cursor-pointer shadow-lg shadow-accent/25"
         >
-          Pick a movie
-        </button>
+          {selected ? "Pick another" : "Pick a movie"}
+        </motion.button>
       )}
 
-      {selected && (
-        <div className="flex gap-5 bg-surface border border-border rounded-xl p-5">
-          {selected.poster && (
-            <img
-              src={selected.poster}
-              alt={selected.title}
-              className="w-20 rounded-md flex-shrink-0 object-cover"
-            />
-          )}
-          <div className="space-y-1.5 min-w-0">
-            <p className="font-display text-xl text-text">{selected.title}</p>
-            <p className="text-muted text-xs">
-              {[
-                selected.year,
-                selected.runtime && `${selected.runtime} min`,
-                selected.rating && `★ ${selected.rating.toFixed(1)}`,
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-            </p>
-            {selected.genres && (
-              <p className="text-muted text-xs">{selected.genres.join(", ")}</p>
-            )}
-            {selected.overview && (
-              <p className="text-text/70 text-sm leading-relaxed pt-1">
-                {selected.overview}
-              </p>
-            )}
-          </div>
-        </div>
+      {/* Modal — animates in on pick */}
+      {showModal && selected && (
+        <MovieModal movie={selected} onClose={() => setShowModal(false)} />
       )}
+
+      {/* Compact inline card — shown after modal is closed */}
+      <AnimatePresence>
+        {selected && !showModal && (
+          <motion.div
+            key={selected.title}
+            className="w-full max-w-sm"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            <p className="text-muted text-xs uppercase tracking-wider mb-3 text-center">
+              Last pick
+            </p>
+            <div className="cursor-pointer" onClick={() => setShowModal(true)}>
+              <MovieCard movie={selected} compact />
+            </div>
+            <p className="text-center text-muted text-xs mt-2">
+              Click to expand
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
