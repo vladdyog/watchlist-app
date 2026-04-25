@@ -21,6 +21,7 @@ const CSVUpload: React.FC<Props> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [isParsing, setIsParsing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const processFile = async (file: File) => {
@@ -29,7 +30,9 @@ const CSVUpload: React.FC<Props> = ({
       return;
     }
     setFileName(file.name);
+    setIsParsing(true);
     const result = await parseCSV(file);
+    setIsParsing(false);
     if (!result.success) {
       onError(result.error);
       return;
@@ -63,13 +66,54 @@ const CSVUpload: React.FC<Props> = ({
       setIsDragging(false);
   };
 
+  // ── Parsing state ────────────────────────────────────────────────────────
+  if (isParsing) {
+    return (
+      <div className="bg-surface border border-border rounded-xl p-5 flex items-center gap-3">
+        <svg
+          className="animate-spin w-4 h-4 text-accent flex-shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          />
+        </svg>
+        <div>
+          <p className="text-text text-sm">Parsing {fileName}...</p>
+          <p className="text-muted text-xs">Reading your watchlist</p>
+        </div>
+      </div>
+    );
+  }
+
   // ── Enriching state ───────────────────────────────────────────────────────
+  const ENRICHING_MESSAGES = [
+    "Sit back and relax — we're gathering info on your watchlist...",
+    "Good taste detected! Fetching all the details...",
+    "Hold tight! We're looking up your movies...",
+    "Consulting the cinema archives...",
+    "Great watchlist! Give us a moment to look everything up...",
+  ];
+
   if (isEnriching && progress) {
     const pct = Math.round((progress.completed / progress.total) * 100);
+    const message =
+      ENRICHING_MESSAGES[progress.total % ENRICHING_MESSAGES.length];
     return (
       <div className="bg-surface border border-border rounded-xl p-5 space-y-3">
         <div className="flex justify-between text-sm">
-          <span className="text-text">Enriching movies via TMDb...</span>
+          <span className="text-text">{message}</span>
           <span className="text-accent font-medium">
             {progress.completed} / {progress.total}
           </span>

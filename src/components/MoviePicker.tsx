@@ -24,9 +24,12 @@ const MoviePicker: React.FC<Props> = ({ movies, onMoviePicked }) => {
   return (
     <div className="flex flex-col items-center gap-6 py-4">
       {movies.length === 0 ? (
-        <p className="text-muted text-sm">
-          No movies match the current filters.
-        </p>
+        <div className="flex flex-col items-center gap-2 py-4">
+          <p className="text-text text-sm">No movies match your filters</p>
+          <p className="text-muted text-xs">
+            Try adjusting or resetting the filters above
+          </p>
+        </div>
       ) : (
         <motion.button
           onClick={pickRandom}

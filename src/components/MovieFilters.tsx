@@ -11,17 +11,18 @@ function getUniqueGenres(movies: Movie[]): string[] {
   return Array.from(new Set(movies.flatMap((m) => m.genres ?? []))).sort();
 }
 
-const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (
-  props,
-) => (
-  <input
-    {...props}
-    className="bg-surface border border-border rounded-md text-text text-sm px-3 py-2 w-full placeholder:text-muted focus:outline-none focus:border-accent transition-colors duration-150"
-  />
-);
-
 const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <p className="text-muted text-xs uppercase tracking-wider mb-2">{children}</p>
+);
+
+const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({
+  className = "",
+  ...props
+}) => (
+  <input
+    {...props}
+    className={`bg-surface border border-border rounded-lg text-text text-sm px-3 py-2 placeholder:text-muted focus:outline-none focus:border-accent transition-colors duration-150 ${className}`}
+  />
 );
 
 const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
@@ -43,34 +44,34 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
   );
 
   return (
-    <div className="space-y-5">
-      {/* Row 1: Rating + Runtime + Year */}
-      <div className="flex flex-wrap gap-5">
-        <div className="w-28">
+    <div className="space-y-6">
+      {/* Row 1 — Rating, Runtime, Year */}
+      <div className="flex flex-col sm:flex-row gap-6">
+        <div className="flex-1">
           <Label>Min rating</Label>
           <Input
             type="number"
             min={0}
             max={10}
             step={0.1}
-            placeholder="0.0"
+            placeholder="e.g. 7.5"
             value={filters.minRating ?? ""}
             onChange={(e) =>
               set({
                 minRating: e.target.value ? Number(e.target.value) : undefined,
               })
             }
+            className="w-full"
           />
         </div>
 
-        <div>
+        <div className="flex-1">
           <Label>Runtime (min)</Label>
           <div className="flex gap-2">
             <Input
               type="number"
               min={0}
               placeholder="Min"
-              style={{ width: "80px" }}
               value={filters.minRuntime ?? ""}
               onChange={(e) =>
                 set({
@@ -79,12 +80,12 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
                     : undefined,
                 })
               }
+              className="w-full"
             />
             <Input
               type="number"
               min={0}
               placeholder="Max"
-              style={{ width: "80px" }}
               value={filters.maxRuntime ?? ""}
               onChange={(e) =>
                 set({
@@ -93,59 +94,60 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
                     : undefined,
                 })
               }
+              className="w-full"
             />
           </div>
         </div>
 
-        <div>
+        <div className="flex-1">
           <Label>Year</Label>
           <div className="flex gap-2">
             <Input
               type="number"
               placeholder="From"
-              style={{ width: "90px" }}
               value={filters.minYear ?? ""}
               onChange={(e) =>
                 set({
                   minYear: e.target.value ? Number(e.target.value) : undefined,
                 })
               }
+              className="w-full"
             />
             <Input
               type="number"
               placeholder="To"
-              style={{ width: "90px" }}
               value={filters.maxYear ?? ""}
               onChange={(e) =>
                 set({
                   maxYear: e.target.value ? Number(e.target.value) : undefined,
                 })
               }
+              className="w-full"
             />
           </div>
         </div>
       </div>
 
-      {/* Row 2: Date added */}
+      {/* Row 2 — Date added */}
       <div>
         <Label>Added to watchlist</Label>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Input
             type="date"
             value={filters.addedAfter ?? ""}
             onChange={(e) => set({ addedAfter: e.target.value || undefined })}
-            style={{ width: "auto" }}
+            className="flex-1"
           />
           <Input
             type="date"
             value={filters.addedBefore ?? ""}
             onChange={(e) => set({ addedBefore: e.target.value || undefined })}
-            style={{ width: "auto" }}
+            className="flex-1"
           />
         </div>
       </div>
 
-      {/* Row 3: Genres */}
+      {/* Row 3 — Genres */}
       {genres.length > 0 && (
         <div>
           <Label>Genres</Label>
@@ -161,7 +163,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
                     ${
                       active
                         ? "bg-accent border-accent text-bg"
-                        : "bg-transparent border-border text-muted hover:border-accent/50"
+                        : "bg-transparent border-border text-muted hover:border-accent/50 hover:text-text"
                     }
                   `}
                 >
@@ -177,7 +179,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
       {isActive && (
         <button
           onClick={() => onChange({})}
-          className="text-muted text-xs border border-border rounded-md px-3 py-1.5 hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
+          className="text-muted text-xs border border-border rounded-lg px-3 py-1.5 hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
         >
           Reset filters
         </button>
