@@ -14,8 +14,7 @@ const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN as string;
 function loadFromStorage<T>(key: string): T | null {
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    return JSON.parse(raw) as T;
+    return raw ? (JSON.parse(raw) as T) : null;
   } catch {
     return null;
   }
@@ -44,7 +43,6 @@ const App: React.FC = () => {
   useEffect(() => {
     if (progress === null) saveToStorage(STORAGE_KEY, movies);
   }, [movies, progress]);
-
   useEffect(() => {
     saveToStorage(WHEEL_KEY, wheel);
   }, [wheel]);
@@ -54,94 +52,114 @@ const App: React.FC = () => {
     setEnrichmentTime(null);
     setFilters({});
     setError(null);
-
     const start = performance.now();
-
     const enriched = await enrichAllMovies(
       rawMovies,
       TMDB_TOKEN,
-      (completed, total) => {
-        setProgress({ completed, total });
-      },
+      (completed, total) => setProgress({ completed, total }),
     );
-
-    const elapsed = (performance.now() - start) / 1000;
     setMovies(enriched);
     setProgress(null);
-    setEnrichmentTime(elapsed);
+    setEnrichmentTime((performance.now() - start) / 1000);
   };
 
   const handleMoviePicked = (movie: Movie) => {
     if (!wheelEnabled) return;
-    // Avoid duplicates on the wheel
     setWheel((prev) =>
       prev.some((m) => m.title === movie.title) ? prev : [...prev, movie],
     );
-  };
-
-  const handleRemoveFromWheel = (movie: Movie) => {
-    setWheel((prev) => prev.filter((m) => m.title !== movie.title));
   };
 
   const isEnriching = progress !== null;
   const filteredMovies = filterMovies(movies, filters);
 
   return (
-    <div>
-      <h1>Watchlist Movie Picker</h1>
-
-      <CSVUpload onMoviesLoaded={handleMoviesLoaded} onError={setError} />
-
-      {error && <p>{error}</p>}
-
-      {isEnriching && (
-        <p>
-          Enriching movies... {progress.completed} / {progress.total}
+    <div className="min-h-screen bg-bg">
+      {/* Header */}
+      <header className="border-b border-border py-6 text-center">
+        <h1 className="font-display text-4xl font-normal text-text tracking-tight">
+          Movie Picker
+        </h1>
+        <p className="text-muted text-sm mt-1.5">
+          Your watchlist. One random pick.
         </p>
-      )}
+      </header>
 
-      {!isEnriching && movies.length > 0 && (
-        <>
-          <p>
-            {filteredMovies.length} / {movies.length} movies match filters.
-          </p>
-          {enrichmentTime !== null && (
-            <p>Enrichment took {enrichmentTime.toFixed(2)}s</p>
-          )}
-
-          <MovieFilters
-            movies={movies}
-            filters={filters}
-            onChange={setFilters}
+      {/* Content */}
+      <main className="max-w-2xl mx-auto px-6 py-12 space-y-12">
+        {/* Upload */}
+        <Section title="Watchlist">
+          <CSVUpload
+            movieCount={movies.length}
+            isEnriching={isEnriching}
+            progress={progress}
+            enrichmentTime={enrichmentTime}
+            onMoviesLoaded={handleMoviesLoaded}
+            onError={setError}
           />
+          {error && <p className="text-danger text-sm mt-3">{error}</p>}
+        </Section>
 
-          <MoviePicker
-            movies={filteredMovies}
-            onMoviePicked={handleMoviePicked}
-          />
-
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                checked={wheelEnabled}
-                onChange={(e) => setWheelEnabled(e.target.checked)}
+        {!isEnriching && movies.length > 0 && (
+          <>
+            {/* Filters */}
+            <Section title="Filters">
+              <MovieFilters
+                movies={movies}
+                filters={filters}
+                onChange={setFilters}
               />
-              Enable wheel mode
-            </label>
-          </div>
+              <p className="text-muted text-sm mt-3">
+                {filteredMovies.length} / {movies.length} movies match
+              </p>
+            </Section>
 
-          {wheelEnabled && (
-            <MovieWheel
-              movies={wheel}
-              onRemove={handleRemoveFromWheel}
-              onClear={() => setWheel([])}
-            />
-          )}
-        </>
-      )}
+            {/* Picker */}
+            <Section title="Pick a Movie">
+              <label className="flex items-center gap-2 text-sm text-muted cursor-pointer mb-4">
+                <input
+                  type="checkbox"
+                  checked={wheelEnabled}
+                  onChange={(e) => setWheelEnabled(e.target.checked)}
+                  className="accent-accent w-4 h-4"
+                />
+                Enable wheel mode
+              </label>
+              <MoviePicker
+                movies={filteredMovies}
+                onMoviePicked={handleMoviePicked}
+              />
+            </Section>
+
+            {/* Wheel */}
+            {wheelEnabled && (
+              <Section title="The Wheel">
+                <MovieWheel
+                  movies={wheel}
+                  onRemove={(m) =>
+                    setWheel((prev) => prev.filter((w) => w.title !== m.title))
+                  }
+                  onClear={() => setWheel([])}
+                />
+              </Section>
+            )}
+          </>
+        )}
+      </main>
     </div>
   );
 };
+
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
+  title,
+  children,
+}) => (
+  <section>
+    <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest mb-5 pb-2.5 border-b border-border">
+      {title}
+    </h2>
+    {children}
+  </section>
+);
 
 export default App;
