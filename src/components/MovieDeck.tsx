@@ -12,7 +12,7 @@ type Props = {
 const CARD_WIDTH    = 120
 const CARD_HEIGHT   = 180
 const CARD_OFFSET   = 40
-const SPIN_DURATION = 3500
+const SHUFFLE_DURATION = 3500
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 4)
 
@@ -29,16 +29,16 @@ const PosterCard: React.FC<{
   isHovered:    boolean
   isActive:     boolean
   isWinner:     boolean
-  isSpinning:   boolean
+  isShuffling:   boolean
   isFlipped:    boolean   // face-down during shuffle phase
   nudge:        number
   onHoverStart: () => void
   onHoverEnd:   () => void
   onClick:      () => void
   onRemove:     () => void
-}> = ({ movie, index, total, isHovered, isActive, isWinner, isSpinning, isFlipped, nudge, onHoverStart, onHoverEnd, onClick, onRemove }) => {
+}> = ({ movie, index, total, isHovered, isActive, isWinner, isShuffling, isFlipped, nudge, onHoverStart, onHoverEnd, onClick, onRemove }) => {
   const isLifted  = isHovered || isActive || isWinner
-  const showInfo  = (isHovered || isWinner) && !isSpinning
+  const showInfo  = (isHovered || isWinner) && !isShuffling
 
   return (
     <motion.div
@@ -60,7 +60,7 @@ const PosterCard: React.FC<{
         scale:   isLifted ? 1.08 : 1,
       }}
       transition={{ type: 'spring', stiffness: 200, damping: 32 }}
-      onHoverStart={() => !isSpinning && onHoverStart()}
+      onHoverStart={() => !isShuffling && onHoverStart()}
       onHoverEnd={onHoverEnd}
       onClick={onClick}
     >
@@ -82,7 +82,7 @@ const PosterCard: React.FC<{
           style={{ backfaceVisibility: 'hidden' }}
         >
           <AnimatePresence>
-            {isHovered && !isSpinning && !isFlipped && (
+            {isHovered && !isShuffling && !isFlipped && (
               <motion.button
                 initial={{ opacity: 0, scale: 0.6 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -137,7 +137,7 @@ const PosterCard: React.FC<{
 // ── Main component ───────────────────────────────────────────────────────────
 const MovieDeck: React.FC<Props> = ({ movies, onRemove, onClear }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
-  const [isSpinning, setIsSpinning]     = useState(false)
+  const [isShuffling, setIsShuffling]     = useState(false)
   const [activeIndex, setActiveIndex]   = useState<number | null>(null)
   const [winnerTitle, setWinnerTitle]   = useState<string | null>(null)
   const [accepted, setAccepted]         = useState(false)
@@ -175,15 +175,15 @@ const MovieDeck: React.FC<Props> = ({ movies, onRemove, onClear }) => {
     // ── Phase 1: flip all cards face-down ──
     const allFlipped = new Set(pool.map((_, i) => i))
     setFlippedCards(allFlipped)
-    setIsSpinning(true)
+    setIsShuffling(true)
     startTimeRef.current = null
 
-    // ── Phase 2: spin through face-down cards ──
+    // ── Phase 2: shuffle through face-down cards ──
     setTimeout(() => {
       const animate = (ts: number) => {
         if (!startTimeRef.current) startTimeRef.current = ts
         const elapsed   = ts - startTimeRef.current
-        const progress  = Math.min(elapsed / SPIN_DURATION, 1)
+        const progress  = Math.min(elapsed / SHUFFLE_DURATION, 1)
         // Continuous eased tick — Math.floor ensures we visit every card in order
         const easedTick = Math.floor(easeOut(progress) * totalTicks)
         setActiveIndex(easedTick % pool.length)
@@ -199,7 +199,7 @@ const MovieDeck: React.FC<Props> = ({ movies, onRemove, onClear }) => {
             return next
           })
           setWinnerTitle(pool[picked].title)
-          setIsSpinning(false)
+          setIsShuffling(false)
         }
       }
       animRef.current = requestAnimationFrame(animate)
@@ -241,14 +241,14 @@ const MovieDeck: React.FC<Props> = ({ movies, onRemove, onClear }) => {
               index={i}
               total={movies.length}
               isHovered={hoveredIndex === i}
-              isActive={activeIndex === i && isSpinning}
-              isWinner={winner?.title === movie.title && !isSpinning}
-              isSpinning={isSpinning}
+              isActive={activeIndex === i && isShuffling}
+              isWinner={winner?.title === movie.title && !isShuffling}
+              isShuffling={isShuffling}
               isFlipped={flippedCards.has(i)}
               nudge={hoveredIndex === null ? 0 : (i - hoveredIndex) * 45}
               onHoverStart={() => setHoveredIndex(i)}
               onHoverEnd={() => setHoveredIndex(null)}
-              onClick={() => !isSpinning && !flippedCards.has(i) && setModalMovie(movie)}
+              onClick={() => !isShuffling && !flippedCards.has(i) && setModalMovie(movie)}
               onRemove={() => onRemove(movie)}
             />
           ))}
@@ -264,24 +264,24 @@ const MovieDeck: React.FC<Props> = ({ movies, onRemove, onClear }) => {
       <div className="flex items-center justify-center gap-3">
         <motion.button
           onClick={() => runSpin(movies)}
-          disabled={isSpinning || movies.length < 2}
-          whileHover={!isSpinning && movies.length >= 2 ? { scale: 1.04 } : {}}
-          whileTap={!isSpinning && movies.length >= 2 ? { scale: 0.96 } : {}}
+          disabled={isShuffling || movies.length < 2}
+          whileHover={!isShuffling && movies.length >= 2 ? { scale: 1.04 } : {}}
+          whileTap={!isShuffling && movies.length >= 2 ? { scale: 0.96 } : {}}
           transition={{ type: 'spring', stiffness: 400, damping: 20 }}
           className={`
             px-8 py-3 rounded-full text-sm font-medium transition-colors duration-150
-            ${isSpinning || movies.length < 2
+            ${isShuffling || movies.length < 2
               ? 'bg-surface text-muted cursor-not-allowed border border-border'
               : 'bg-accent text-bg cursor-pointer shadow-lg shadow-accent/25'}
           `}
         >
-          {isSpinning ? 'Spinning...' : 'Spin'}
+          {isShuffling ? 'Shuffling...' : 'Shuffle'}
         </motion.button>
 
         {movies.length > 0 && (
           <button
             onClick={() => { onClear(); setFlippedCards(new Set()) }}
-            disabled={isSpinning}
+            disabled={isShuffling}
             className="px-4 py-3 rounded-full text-xs border border-border text-muted hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
           >
             Clear all
@@ -290,12 +290,12 @@ const MovieDeck: React.FC<Props> = ({ movies, onRemove, onClear }) => {
       </div>
 
       {movies.length === 1 && (
-        <p className="text-center text-muted text-xs">Add at least one more movie to spin.</p>
+        <p className="text-center text-muted text-xs">Add at least one more movie to shuffle.</p>
       )}
 
       {/* Winner actions */}
       <AnimatePresence>
-        {winner && !isSpinning && !accepted && (
+        {winner && !isShuffling && !accepted && (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -318,7 +318,7 @@ const MovieDeck: React.FC<Props> = ({ movies, onRemove, onClear }) => {
                 onClick={handleEliminate}
                 className="px-5 py-2 rounded-full text-sm border border-border text-muted hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
               >
-                Eliminate & spin again
+                Eliminate & Shuffle again
               </button>
             </div>
           </motion.div>
