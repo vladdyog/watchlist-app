@@ -128,26 +128,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
         </div>
       </div>
 
-      {/* Row 2 — Date added */}
-      <div>
-        <Label>Added to watchlist</Label>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Input
-            type="date"
-            value={filters.addedAfter ?? ""}
-            onChange={(e) => set({ addedAfter: e.target.value || undefined })}
-            className="flex-1"
-          />
-          <Input
-            type="date"
-            value={filters.addedBefore ?? ""}
-            onChange={(e) => set({ addedBefore: e.target.value || undefined })}
-            className="flex-1"
-          />
-        </div>
-      </div>
-
-      {/* Row 3 — Genres */}
+      {/* Row 2 — Genres */}
       {genres.length > 0 && (
         <div>
           <Label>Genres</Label>

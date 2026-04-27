@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import CSVUpload from "./components/CSVUpload";
 import MoviePicker from "./components/MoviePicker";
 import MovieFilters from "./components/MovieFilters";
-import MovieWheel from "./components/MovieWheel";
+import MovieDeck from "./components/MovieDeck";
 import { enrichAllMovies } from "./utils/tmdb";
 import { filterMovies } from "./utils";
 import type { Movie, FilterOptions } from "./types";
 
 const STORAGE_KEY = "watchlist";
-const WHEEL_KEY = "wheel";
+const DECK_KEY = "deck";
+const DECK_ENABLED_KEY = "deckEnabled";
 const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN as string;
 
 function loadFromStorage<T>(key: string): T | null {
@@ -28,10 +29,12 @@ const App: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>(
     () => loadFromStorage<Movie[]>(STORAGE_KEY) ?? [],
   );
-  const [wheel, setWheel] = useState<Movie[]>(
-    () => loadFromStorage<Movie[]>(WHEEL_KEY) ?? [],
+  const [deck, setDeck] = useState<Movie[]>(
+    () => loadFromStorage<Movie[]>(DECK_KEY) ?? [],
   );
-  const [wheelEnabled, setWheelEnabled] = useState(false);
+  const [deckEnabled, setDeckEnabled] = useState<boolean>(
+    () => loadFromStorage<boolean>(DECK_ENABLED_KEY) ?? false,
+  );
   const [filters, setFilters] = useState<FilterOptions>({});
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<{
@@ -43,9 +46,14 @@ const App: React.FC = () => {
   useEffect(() => {
     if (progress === null) saveToStorage(STORAGE_KEY, movies);
   }, [movies, progress]);
+
   useEffect(() => {
-    saveToStorage(WHEEL_KEY, wheel);
-  }, [wheel]);
+    saveToStorage(DECK_KEY, deck);
+  }, [deck]);
+
+  useEffect(() => {
+    saveToStorage(DECK_ENABLED_KEY, deckEnabled);
+  }, [deckEnabled]);
 
   const handleMoviesLoaded = async (rawMovies: Movie[]) => {
     setProgress({ completed: 0, total: rawMovies.length });
@@ -64,8 +72,8 @@ const App: React.FC = () => {
   };
 
   const handleMoviePicked = (movie: Movie) => {
-    if (!wheelEnabled) return;
-    setWheel((prev) =>
+    if (!deckEnabled) return;
+    setDeck((prev) =>
       prev.some((m) => m.title === movie.title) ? prev : [...prev, movie],
     );
   };
@@ -114,35 +122,46 @@ const App: React.FC = () => {
               </p>
             </Section>
 
-            {/* Picker */}
-            <Section title="Pick a Movie">
-              <label className="flex items-center gap-2 text-sm text-muted cursor-pointer mb-4">
-                <input
-                  type="checkbox"
-                  checked={wheelEnabled}
-                  onChange={(e) => setWheelEnabled(e.target.checked)}
-                  className="accent-accent w-4 h-4"
-                />
-                Enable wheel mode
-              </label>
+            {/* Picker + optional Deck */}
+            <section>
+              {/* Header — title and toggle always on the same row */}
+              <div className="flex items-center justify-between mb-5 pb-2.5 border-b border-border">
+                <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest">
+                  Pick a Movie
+                </h2>
+                <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={deckEnabled}
+                    onChange={(e) => setDeckEnabled(e.target.checked)}
+                    className="accent-accent w-3.5 h-3.5"
+                  />
+                  DECK MODE
+                </label>
+              </div>
+
+              {/* Button — always here, same position */}
               <MoviePicker
                 movies={filteredMovies}
                 onMoviePicked={handleMoviePicked}
+                wheelEnabled={deckEnabled}
               />
-            </Section>
 
-            {/* Wheel */}
-            {wheelEnabled && (
-              <Section title="The Wheel">
-                <MovieWheel
-                  movies={wheel}
-                  onRemove={(m) =>
-                    setWheel((prev) => prev.filter((w) => w.title !== m.title))
-                  }
-                  onClear={() => setWheel([])}
-                />
-              </Section>
-            )}
+              {/* Deck — slides in directly below with no heavy separator */}
+              {deckEnabled && (
+                <div className="mt-2">
+                  <MovieDeck
+                    movies={deck}
+                    onRemove={(m) =>
+                      setDeck((prev) =>
+                        prev.filter((w) => w.title !== m.title),
+                      )
+                    }
+                    onClear={() => setDeck([])}
+                  />
+                </div>
+              )}
+            </section>
           </>
         )}
       </main>
