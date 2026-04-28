@@ -3,6 +3,8 @@ import CSVUpload from "./components/CSVUpload";
 import MoviePicker from "./components/MoviePicker";
 import MovieFilters from "./components/MovieFilters";
 import MovieDeck from "./components/MovieDeck";
+import MovieCard from "./components/MovieCard";
+import MovieModal from "./components/MovieModal";
 import { enrichAllMovies } from "./utils/tmdb";
 import { filterMovies } from "./utils";
 import type { Movie, FilterOptions } from "./types";
@@ -43,6 +45,12 @@ const App: React.FC = () => {
   } | null>(null);
   const [enrichmentTime, setEnrichmentTime] = useState<number | null>(null);
 
+  // Shuffle session state — true from first Shuffle click until "Watch this"
+  const [shuffleActive, setShuffleActive] = useState(false);
+  // The movie the deck chose — shown as a "last pick" card after Watch this
+  const [sessionWinner, setSessionWinner] = useState<Movie | null>(null);
+  const [showWinnerModal, setShowWinnerModal] = useState(false);
+
   useEffect(() => {
     if (progress === null) saveToStorage(STORAGE_KEY, movies);
   }, [movies, progress]);
@@ -76,6 +84,19 @@ const App: React.FC = () => {
     setDeck((prev) =>
       prev.some((m) => m.title === movie.title) ? prev : [...prev, movie],
     );
+  };
+
+  // Called when the deck shuffle button is first pressed
+  const handleShuffleStart = () => {
+    setShuffleActive(true);
+    setSessionWinner(null);
+  };
+
+  // Called when the user confirms "Watch this!" in the deck
+  const handleWatchThis = (winner: Movie) => {
+    setSessionWinner(winner);
+    setShuffleActive(false);
+    setDeck([]);
   };
 
   const isEnriching = progress !== null;
@@ -140,11 +161,12 @@ const App: React.FC = () => {
                 </label>
               </div>
 
-              {/* Button — always here, same position */}
+              {/* Button — hidden during an active shuffle session */}
               <MoviePicker
                 movies={filteredMovies}
                 onMoviePicked={handleMoviePicked}
                 wheelEnabled={deckEnabled}
+                shuffleActive={shuffleActive}
               />
 
               {/* Deck — slides in directly below with no heavy separator */}
@@ -152,6 +174,10 @@ const App: React.FC = () => {
                 <div className="mt-2">
                   <MovieDeck
                     movies={deck}
+                    shuffleActive={shuffleActive}
+                    onShuffleStart={handleShuffleStart}
+                    onWatchThis={handleWatchThis}
+                    onClose={() => setShuffleActive(false)}
                     onRemove={(m) =>
                       setDeck((prev) =>
                         prev.filter((w) => w.title !== m.title),
@@ -160,6 +186,31 @@ const App: React.FC = () => {
                     onClear={() => setDeck([])}
                   />
                 </div>
+              )}
+
+              {/* Session winner — shown after "Watch this!" like the last-pick card */}
+              {deckEnabled && sessionWinner && !shuffleActive && (
+                <div className="mt-8">
+                  <p className="text-muted text-xs uppercase tracking-wider mb-3 text-center">
+                    Tonight you're watching
+                  </p>
+                  <div
+                    className="w-full max-w-sm mx-auto cursor-pointer"
+                    onClick={() => setShowWinnerModal(true)}
+                  >
+                    <MovieCard movie={sessionWinner} compact />
+                  </div>
+                  <p className="text-center text-muted text-xs mt-2">
+                    Click to expand
+                  </p>
+                </div>
+              )}
+
+              {showWinnerModal && sessionWinner && (
+                <MovieModal
+                  movie={sessionWinner}
+                  onClose={() => setShowWinnerModal(false)}
+                />
               )}
             </section>
           </>

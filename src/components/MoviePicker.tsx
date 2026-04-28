@@ -8,9 +8,15 @@ type Props = {
   movies: Movie[];
   onMoviePicked?: (movie: Movie) => void;
   wheelEnabled?: boolean;
+  shuffleActive?: boolean;
 };
 
-const MoviePicker: React.FC<Props> = ({ movies, onMoviePicked, wheelEnabled }) => {
+const MoviePicker: React.FC<Props> = ({
+  movies,
+  onMoviePicked,
+  wheelEnabled,
+  shuffleActive,
+}) => {
   const [selected, setSelected] = useState<Movie | null>(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -40,28 +46,30 @@ const MoviePicker: React.FC<Props> = ({ movies, onMoviePicked, wheelEnabled }) =
           </p>
         </div>
       ) : (
-        // Single button element — CSS transition handles colour crossfade between modes
-        <motion.button
-          onClick={pickRandom}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-          className={`
-            px-12 py-4 rounded-full cursor-pointer
-            text-sm font-normal uppercase tracking-wide
-            transition-all duration-600
-            ${wheelEnabled
-              ? "bg-surface border border-border text-text hover:border-accent/50"
-              : "bg-accent text-bg shadow-lg shadow-accent/25 hover:bg-accent-hover"
-            }
-          `}
-        >
-          {label}
-        </motion.button>
+        // Hidden while the deck's shuffle session is running
+        !shuffleActive && (
+          <motion.button
+            onClick={pickRandom}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            className={`
+              px-12 py-4 rounded-full cursor-pointer
+              text-sm font-normal uppercase tracking-wide
+              transition-all duration-600
+              ${wheelEnabled
+                ? "bg-surface border border-border text-text hover:border-accent/50"
+                : "bg-accent text-bg shadow-lg shadow-accent/25 hover:bg-accent-hover"
+              }
+            `}
+          >
+            {label}
+          </motion.button>
+        )
       )}
 
       {/* Deck mode: show added movie name as a link that opens the popup */}
-      {wheelEnabled && selected && (
+      {wheelEnabled && selected && !shuffleActive && (
         <p className="text-muted text-xs -mt-2">
           Added{" "}
           <button
@@ -74,8 +82,8 @@ const MoviePicker: React.FC<Props> = ({ movies, onMoviePicked, wheelEnabled }) =
         </p>
       )}
 
-      {/* Modal — normal mode only */}
-      {!wheelEnabled && showModal && selected && (
+      {/* Modal — rendered for both normal and deck mode */}
+      {showModal && selected && (
         <MovieModal movie={selected} onClose={() => setShowModal(false)} />
       )}
 
