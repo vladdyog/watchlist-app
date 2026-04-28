@@ -1,3 +1,5 @@
+// App.tsx
+
 import React, { useState, useEffect } from "react";
 import CSVUpload from "./components/CSVUpload";
 import MoviePicker from "./components/MoviePicker";
@@ -31,28 +33,37 @@ const App: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>(
     () => loadFromStorage<Movie[]>(STORAGE_KEY) ?? [],
   );
+
   const [deck, setDeck] = useState<Movie[]>(
     () => loadFromStorage<Movie[]>(DECK_KEY) ?? [],
   );
+
   const [deckEnabled, setDeckEnabled] = useState<boolean>(
     () => loadFromStorage<boolean>(DECK_ENABLED_KEY) ?? false,
   );
+
   const [filters, setFilters] = useState<FilterOptions>({});
   const [error, setError] = useState<string | null>(null);
+
   const [progress, setProgress] = useState<{
     completed: number;
     total: number;
   } | null>(null);
+
   const [enrichmentTime, setEnrichmentTime] = useState<number | null>(null);
 
-  // Shuffle session state — true from first Shuffle click until "Watch this"
+  // Shared Last Pick
+  const [lastPick, setLastPick] = useState<Movie | null>(null);
+
+  // Deck session
   const [shuffleActive, setShuffleActive] = useState(false);
-  // The movie the deck chose — shown as a "last pick" card after Watch this
-  const [sessionWinner, setSessionWinner] = useState<Movie | null>(null);
-  const [showWinnerModal, setShowWinnerModal] = useState(false);
+
+  const [showDeckWinnerModal, setShowDeckWinnerModal] = useState(false);
 
   useEffect(() => {
-    if (progress === null) saveToStorage(STORAGE_KEY, movies);
+    if (progress === null) {
+      saveToStorage(STORAGE_KEY, movies);
+    }
   }, [movies, progress]);
 
   useEffect(() => {
@@ -68,35 +79,48 @@ const App: React.FC = () => {
     setEnrichmentTime(null);
     setFilters({});
     setError(null);
+
     const start = performance.now();
+
     const enriched = await enrichAllMovies(
       rawMovies,
       TMDB_TOKEN,
       (completed, total) => setProgress({ completed, total }),
     );
+
     setMovies(enriched);
     setProgress(null);
     setEnrichmentTime((performance.now() - start) / 1000);
   };
 
   const handleMoviePicked = (movie: Movie) => {
-    if (!deckEnabled) return;
+    // Normal picker mode
+    if (!deckEnabled) {
+      setLastPick(movie);
+      return;
+    }
+
+    // Deck mode — only add to deck
     setDeck((prev) =>
       prev.some((m) => m.title === movie.title) ? prev : [...prev, movie],
     );
   };
 
-  // Called when the deck shuffle button is first pressed
   const handleShuffleStart = () => {
     setShuffleActive(true);
-    setSessionWinner(null);
   };
 
-  // Called when the user confirms "Watch this!" in the deck
+  // Confirmed winner only
   const handleWatchThis = (winner: Movie) => {
-    setSessionWinner(winner);
-    setShuffleActive(false);
+    // Winner becomes Last Pick
+    setLastPick(winner);
+
+    // Clear deck session
     setDeck([]);
+  };
+
+  const handleDeckClose = () => {
+    setShuffleActive(false);
   };
 
   const isEnriching = progress !== null;
@@ -104,17 +128,16 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-bg">
-      {/* Header */}
       <header className="border-b border-border py-6 text-center">
         <h1 className="font-display text-4xl font-normal text-text tracking-tight">
           Movie Picker
         </h1>
+
         <p className="text-muted text-sm mt-1.5">
           Your watchlist. One random pick.
         </p>
       </header>
 
-      {/* Content */}
       <main className="max-w-2xl mx-auto px-6 py-12 space-y-12">
         {/* Upload */}
         <Section title="Watchlist">
@@ -126,6 +149,7 @@ const App: React.FC = () => {
             onMoviesLoaded={handleMoviesLoaded}
             onError={setError}
           />
+
           {error && <p className="text-danger text-sm mt-3">{error}</p>}
         </Section>
 
@@ -138,18 +162,19 @@ const App: React.FC = () => {
                 filters={filters}
                 onChange={setFilters}
               />
+
               <p className="text-muted text-sm mt-3">
                 {filteredMovies.length} / {movies.length} movies match
               </p>
             </Section>
 
-            {/* Picker + optional Deck */}
+            {/* Picker */}
             <section>
-              {/* Header — title and toggle always on the same row */}
               <div className="flex items-center justify-between mb-5 pb-2.5 border-b border-border">
                 <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest">
                   Pick a Movie
                 </h2>
+
                 <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
                   <input
                     type="checkbox"
@@ -161,15 +186,14 @@ const App: React.FC = () => {
                 </label>
               </div>
 
-              {/* Button — hidden during an active shuffle session */}
               <MoviePicker
                 movies={filteredMovies}
                 onMoviePicked={handleMoviePicked}
-                wheelEnabled={deckEnabled}
+                deckEnabled={deckEnabled}
                 shuffleActive={shuffleActive}
+                lastPick={lastPick}
               />
 
-              {/* Deck — slides in directly below with no heavy separator */}
               {deckEnabled && (
                 <div className="mt-2">
                   <MovieDeck
@@ -177,39 +201,39 @@ const App: React.FC = () => {
                     shuffleActive={shuffleActive}
                     onShuffleStart={handleShuffleStart}
                     onWatchThis={handleWatchThis}
-                    onClose={() => setShuffleActive(false)}
+                    onClose={handleDeckClose}
                     onRemove={(m) =>
-                      setDeck((prev) =>
-                        prev.filter((w) => w.title !== m.title),
-                      )
+                      setDeck((prev) => prev.filter((w) => w.title !== m.title))
                     }
                     onClear={() => setDeck([])}
                   />
                 </div>
               )}
 
-              {/* Session winner — shown after "Watch this!" like the last-pick card */}
-              {deckEnabled && sessionWinner && !shuffleActive && (
+              {/* Deck mode Last Pick */}
+              {deckEnabled && lastPick && !shuffleActive && (
                 <div className="mt-8">
                   <p className="text-muted text-xs uppercase tracking-wider mb-3 text-center">
-                    Tonight you're watching
+                    Last pick
                   </p>
+
                   <div
                     className="w-full max-w-sm mx-auto cursor-pointer"
-                    onClick={() => setShowWinnerModal(true)}
+                    onClick={() => setShowDeckWinnerModal(true)}
                   >
-                    <MovieCard movie={sessionWinner} compact />
+                    <MovieCard movie={lastPick} compact />
                   </div>
+
                   <p className="text-center text-muted text-xs mt-2">
                     Click to expand
                   </p>
                 </div>
               )}
 
-              {showWinnerModal && sessionWinner && (
+              {showDeckWinnerModal && lastPick && (
                 <MovieModal
-                  movie={sessionWinner}
-                  onClose={() => setShowWinnerModal(false)}
+                  movie={lastPick}
+                  onClose={() => setShowDeckWinnerModal(false)}
                 />
               )}
             </section>
@@ -220,14 +244,15 @@ const App: React.FC = () => {
   );
 };
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
-  title,
-  children,
-}) => (
+const Section: React.FC<{
+  title: string;
+  children: React.ReactNode;
+}> = ({ title, children }) => (
   <section>
     <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest mb-5 pb-2.5 border-b border-border">
       {title}
     </h2>
+
     {children}
   </section>
 );
