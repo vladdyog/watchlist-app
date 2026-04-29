@@ -1,20 +1,17 @@
-// App.tsx
+import React, { useState, useEffect } from "react";
+import CSVUpload from "./components/CSVUpload";
+import MoviePicker from "./components/MoviePicker";
+import MovieFilters from "./components/MovieFilters";
+import MovieDeck from "./components/MovieDeck";
+import MovieCard from "./components/MovieCard";
+import MovieModal from "./components/MovieModal";
+import { enrichAllMovies } from "./utils/tmdb";
+import { filterMovies } from "./utils";
+import type { Movie, FilterOptions } from "./types";
 
-import React, { useEffect, useState } from 'react';
-
-import CSVUpload from './components/CSVUpload';
-import MovieCard from './components/MovieCard';
-import MovieDeck from './components/MovieDeck';
-import MovieFilters from './components/MovieFilters';
-import MovieModal from './components/MovieModal';
-import MoviePicker from './components/MoviePicker';
-import type { FilterOptions, Movie } from './types';
-import { filterMovies } from './utils';
-import { enrichAllMovies } from './utils/tmdb';
-
-const STORAGE_KEY = 'watchlist';
-const DECK_KEY = 'deck';
-const DECK_ENABLED_KEY = 'deckEnabled';
+const STORAGE_KEY = "watchlist";
+const DECK_KEY = "deck";
+const DECK_ENABLED_KEY = "deckEnabled";
 const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN as string;
 const APP_VERSION = import.meta.env.PACKAGE_VERSION;
 const AUTHOR = import.meta.env.AUTHOR;
