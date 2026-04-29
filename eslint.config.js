@@ -8,6 +8,10 @@ export default [
   ...tseslint.configs.recommended,
 
   {
+    ignores: ['dist/**', 'node_modules/**'],
+  },
+
+  {
     plugins: {
       'simple-import-sort': simpleImportSort,
     },
