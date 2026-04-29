@@ -1,10 +1,11 @@
 // MoviePicker.tsx
 
-import React, { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import MovieCard from "./MovieCard";
-import MovieModal from "./MovieModal";
-import type { Movie } from "../types";
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useState } from 'react';
+
+import type { Movie } from '../types';
+import MovieCard from './MovieCard';
+import MovieModal from './MovieModal';
 
 type Props = {
   movies: Movie[];
@@ -39,10 +40,10 @@ const MoviePicker: React.FC<Props> = ({
   const isEmpty = movies.length === 0;
 
   const label = deckEnabled
-    ? "Add to deck"
+    ? 'Add to deck'
     : lastPick
-      ? "Pick another"
-      : "Pick a movie";
+      ? 'Pick another'
+      : 'Pick a movie';
 
   return (
     <div className="flex flex-col items-center gap-6 py-4">
@@ -59,14 +60,14 @@ const MoviePicker: React.FC<Props> = ({
             onClick={pickRandom}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             className={`
               px-12 py-4 rounded-full cursor-pointer
               text-sm font-normal u
               ${
                 deckEnabled
-                  ? "bg-surface border border-border text-text hover:border-accent/50"
-                  : "bg-accent text-bg shadow-lg shadow-accent/25 hover:bg-accent-hover"
+                  ? 'bg-surface border border-border text-text hover:border-accent/50'
+                  : 'bg-accent text-bg shadow-lg shadow-accent/25 hover:bg-accent-hover'
               }
             `}
           >
@@ -90,7 +91,7 @@ const MoviePicker: React.FC<Props> = ({
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
             >
               <p className="text-muted text-xs uppercase tracking-wider mb-3 text-center">
                 Last pick

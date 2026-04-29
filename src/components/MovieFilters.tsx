@@ -1,5 +1,6 @@
-import React from "react";
-import type { FilterOptions, Movie } from "../types";
+import React from 'react';
+
+import type { FilterOptions, Movie } from '../types';
 
 type Props = {
   movies: Movie[];
@@ -16,7 +17,7 @@ const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const Input: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = ({
-  className = "",
+  className = '',
   ...props
 }) => (
   <input
@@ -55,7 +56,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
             max={10}
             step={0.1}
             placeholder="e.g. 7.5"
-            value={filters.minRating ?? ""}
+            value={filters.minRating ?? ''}
             onChange={(e) =>
               set({
                 minRating: e.target.value ? Number(e.target.value) : undefined,
@@ -72,7 +73,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
               type="number"
               min={0}
               placeholder="Min"
-              value={filters.minRuntime ?? ""}
+              value={filters.minRuntime ?? ''}
               onChange={(e) =>
                 set({
                   minRuntime: e.target.value
@@ -86,7 +87,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
               type="number"
               min={0}
               placeholder="Max"
-              value={filters.maxRuntime ?? ""}
+              value={filters.maxRuntime ?? ''}
               onChange={(e) =>
                 set({
                   maxRuntime: e.target.value
@@ -105,7 +106,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
             <Input
               type="number"
               placeholder="From"
-              value={filters.minYear ?? ""}
+              value={filters.minYear ?? ''}
               onChange={(e) =>
                 set({
                   minYear: e.target.value ? Number(e.target.value) : undefined,
@@ -116,7 +117,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
             <Input
               type="number"
               placeholder="To"
-              value={filters.maxYear ?? ""}
+              value={filters.maxYear ?? ''}
               onChange={(e) =>
                 set({
                   maxYear: e.target.value ? Number(e.target.value) : undefined,
@@ -143,8 +144,8 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
                     px-3 py-1 rounded-full text-xs border transition-all duration-150 cursor-pointer
                     ${
                       active
-                        ? "bg-accent border-accent text-bg"
-                        : "bg-transparent border-border text-muted hover:border-accent/50 hover:text-text"
+                        ? 'bg-accent border-accent text-bg'
+                        : 'bg-transparent border-border text-muted hover:border-accent/50 hover:text-text'
                     }
                   `}
                 >

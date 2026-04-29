@@ -1,6 +1,7 @@
-import React, { useState, useRef } from "react";
-import { parseCSV, normalizeMovies } from "../utils";
-import type { Movie } from "../types";
+import React, { useRef, useState } from 'react';
+
+import type { Movie } from '../types';
+import { normalizeMovies, parseCSV } from '../utils';
 
 type Props = {
   movieCount: number;
@@ -25,8 +26,8 @@ const CSVUpload: React.FC<Props> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const processFile = async (file: File) => {
-    if (!file.name.endsWith(".csv")) {
-      onError("Please upload a .csv file.");
+    if (!file.name.endsWith('.csv')) {
+      onError('Please upload a .csv file.');
       return;
     }
     setFileName(file.name);
@@ -39,7 +40,7 @@ const CSVUpload: React.FC<Props> = ({
     }
     const movies = normalizeMovies(result.rows);
     if (movies.length === 0) {
-      onError("No valid movies found in the CSV file.");
+      onError('No valid movies found in the CSV file.');
       return;
     }
     onMoviesLoaded(movies);
@@ -100,10 +101,10 @@ const CSVUpload: React.FC<Props> = ({
   // ── Enriching state ───────────────────────────────────────────────────────
   const ENRICHING_MESSAGES = [
     "Sit back and relax — we're gathering info on your watchlist...",
-    "Good taste detected! Fetching all the details...",
+    'Good taste detected! Fetching all the details...',
     "Hold tight! We're looking up your movies...",
-    "Consulting the cinema archives...",
-    "Great watchlist! Give us a moment to look everything up...",
+    'Consulting the cinema archives...',
+    'Great watchlist! Give us a moment to look everything up...',
   ];
 
   if (isEnriching && progress) {
@@ -143,7 +144,7 @@ const CSVUpload: React.FC<Props> = ({
           <span className="text-accent text-lg">✓</span>
           <div>
             <p className="text-text text-sm font-medium">
-              {fileName ?? "Watchlist loaded"}
+              {fileName ?? 'Watchlist loaded'}
             </p>
             <p className="text-muted text-xs">
               {movieCount} movies
@@ -177,20 +178,20 @@ const CSVUpload: React.FC<Props> = ({
         border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200
         ${
           isDragging
-            ? "border-accent bg-accent/5"
-            : "border-border bg-surface hover:border-accent/50"
+            ? 'border-accent bg-accent/5'
+            : 'border-border bg-surface hover:border-accent/50'
         }
       `}
     >
       <div
-        className={`text-3xl mb-3 transition-opacity duration-200 ${isDragging ? "opacity-100" : "opacity-40"}`}
+        className={`text-3xl mb-3 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-40'}`}
       >
-        {isDragging ? "📂" : "📁"}
+        {isDragging ? '📂' : '📁'}
       </div>
       <p className="text-text text-sm mb-1">
         {isDragging
-          ? "Drop your CSV here"
-          : "Drop your CSV here or click to browse"}
+          ? 'Drop your CSV here'
+          : 'Drop your CSV here or click to browse'}
       </p>
       <p className="text-muted text-xs">Supports IMDb and Letterboxd exports</p>
       <input
