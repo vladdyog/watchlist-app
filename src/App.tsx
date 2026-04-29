@@ -135,11 +135,11 @@ const App: React.FC = () => {
         </h1>
 
         <p className="text-muted text-sm mt-1.5">
-          From your watchlist to tonight’s pick.
+          From your watchlist to tonight's pick.
         </p>
       </header>
 
-      <main className="flex-1 max-w-2xl mx-auto px-6 py-12 space-y-12">
+      <main className="flex-1 w-full max-w-2xl mx-auto px-6 py-12 space-y-12">
         {/* Upload */}
         <Section title="Watchlist">
           <CSVUpload

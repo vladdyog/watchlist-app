@@ -12,6 +12,14 @@ type Props = {
   onError: (error: string) => void;
 };
 
+const ENRICHING_MESSAGES = [
+  "Sit back and relax — we're gathering info on your watchlist...",
+  'Good taste detected! Fetching all the details...',
+  "Hold tight! We're looking up your movies...",
+  'Consulting the cinema archives...',
+  'Great watchlist! Give us a moment to look everything up...',
+];
+
 const CSVUpload: React.FC<Props> = ({
   movieCount,
   isEnriching,
@@ -67,95 +75,129 @@ const CSVUpload: React.FC<Props> = ({
       setIsDragging(false);
   };
 
-  // ── Parsing state ────────────────────────────────────────────────────────
-  if (isParsing) {
-    return (
-      <div className="bg-surface border border-border rounded-xl p-5 flex items-center gap-3">
-        <svg
-          className="animate-spin w-4 h-4 text-accent flex-shrink-0"
-          viewBox="0 0 24 24"
-          fill="none"
+  // ── Shared outer wrapper keeps all states the same width ─────────────────
+  const renderContent = () => {
+    // Parsing
+    if (isParsing) {
+      return (
+        <div className="bg-surface border border-border rounded-xl p-5 flex items-center gap-3">
+          <svg
+            className="animate-spin w-4 h-4 text-accent flex-shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            />
+          </svg>
+          <div>
+            <p className="text-text text-sm">Parsing {fileName}...</p>
+            <p className="text-muted text-xs">Reading your watchlist</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Enriching
+    if (isEnriching && progress) {
+      const pct = Math.round((progress.completed / progress.total) * 100);
+      const message =
+        ENRICHING_MESSAGES[progress.total % ENRICHING_MESSAGES.length];
+      return (
+        <div className="bg-surface border border-border rounded-xl p-5 space-y-3">
+          <div className="flex justify-between items-start gap-4 text-sm">
+            <span className="text-text">{message}</span>
+            <span className="text-accent font-medium whitespace-nowrap">
+              {progress.completed} / {progress.total}
+            </span>
+          </div>
+          <div className="h-0.5 bg-border rounded-full overflow-hidden">
+            <div
+              className="h-full bg-accent rounded-full transition-all duration-200"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <p className="text-muted text-xs">{pct}% complete</p>
+        </div>
+      );
+    }
+
+    // Loaded (compact)
+    if (movieCount > 0) {
+      return (
+        <div
+          onClick={() => inputRef.current?.click()}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          className="flex items-center justify-between bg-surface border border-border rounded-xl px-5 py-3.5 cursor-pointer hover:border-accent transition-colors duration-150 group"
         >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          />
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-          />
-        </svg>
-        <div>
-          <p className="text-text text-sm">Parsing {fileName}...</p>
-          <p className="text-muted text-xs">Reading your watchlist</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ── Enriching state ───────────────────────────────────────────────────────
-  const ENRICHING_MESSAGES = [
-    "Sit back and relax — we're gathering info on your watchlist...",
-    'Good taste detected! Fetching all the details...',
-    "Hold tight! We're looking up your movies...",
-    'Consulting the cinema archives...',
-    'Great watchlist! Give us a moment to look everything up...',
-  ];
-
-  if (isEnriching && progress) {
-    const pct = Math.round((progress.completed / progress.total) * 100);
-    const message =
-      ENRICHING_MESSAGES[progress.total % ENRICHING_MESSAGES.length];
-    return (
-      <div className="bg-surface border border-border rounded-xl p-5 space-y-3">
-        <div className="flex justify-between text-sm">
-          <span className="text-text">{message}</span>
-          <span className="text-accent font-medium">
-            {progress.completed} / {progress.total}
+          <div className="flex items-center gap-3">
+            <span className="text-accent text-lg">✓</span>
+            <div>
+              <p className="text-text text-sm font-medium">
+                {fileName ?? 'Watchlist loaded'}
+              </p>
+              <p className="text-muted text-xs">
+                {movieCount} movies
+                {enrichmentTime != null &&
+                  ` · enriched in ${enrichmentTime.toFixed(1)}s`}
+              </p>
+            </div>
+          </div>
+          <span className="text-muted text-xs group-hover:text-accent transition-colors duration-150 whitespace-nowrap">
+            Click to replace
           </span>
-        </div>
-        <div className="h-0.5 bg-border rounded-full overflow-hidden">
-          <div
-            className="h-full bg-accent rounded-full transition-all duration-200"
-            style={{ width: `${pct}%` }}
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            className="hidden"
           />
         </div>
-        <p className="text-muted text-xs">{pct}% complete</p>
-      </div>
-    );
-  }
+      );
+    }
 
-  // ── Loaded (compact) state ────────────────────────────────────────────────
-  if (movieCount > 0 && !isEnriching) {
+    // Empty (dropzone)
     return (
       <div
         onClick={() => inputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
-        className="flex items-center justify-between bg-surface border border-border rounded-xl px-5 py-3.5 cursor-pointer hover:border-accent transition-colors duration-150 group"
+        className={`
+          border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200
+          ${
+            isDragging
+              ? 'border-accent bg-accent/5'
+              : 'border-border bg-surface hover:border-accent/50'
+          }
+        `}
       >
-        <div className="flex items-center gap-3">
-          <span className="text-accent text-lg">✓</span>
-          <div>
-            <p className="text-text text-sm font-medium">
-              {fileName ?? 'Watchlist loaded'}
-            </p>
-            <p className="text-muted text-xs">
-              {movieCount} movies
-              {enrichmentTime != null &&
-                ` · enriched in ${enrichmentTime.toFixed(1)}s`}
-            </p>
-          </div>
+        <div
+          className={`text-3xl mb-3 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-40'}`}
+        >
+          {isDragging ? '📂' : '📁'}
         </div>
-        <span className="text-muted text-xs group-hover:text-accent transition-colors duration-150">
-          Click to replace
-        </span>
+        <p className="text-text text-sm mb-1">
+          {isDragging
+            ? 'Drop your CSV here'
+            : 'Drop your CSV here or click to browse'}
+        </p>
+        <p className="text-muted text-xs">
+          Supports IMDb and Letterboxd exports
+        </p>
         <input
           ref={inputRef}
           type="file"
@@ -165,44 +207,9 @@ const CSVUpload: React.FC<Props> = ({
         />
       </div>
     );
-  }
+  };
 
-  // ── Empty (dropzone) state ────────────────────────────────────────────────
-  return (
-    <div
-      onClick={() => inputRef.current?.click()}
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      className={`
-        border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200
-        ${
-          isDragging
-            ? 'border-accent bg-accent/5'
-            : 'border-border bg-surface hover:border-accent/50'
-        }
-      `}
-    >
-      <div
-        className={`text-3xl mb-3 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-40'}`}
-      >
-        {isDragging ? '📂' : '📁'}
-      </div>
-      <p className="text-text text-sm mb-1">
-        {isDragging
-          ? 'Drop your CSV here'
-          : 'Drop your CSV here or click to browse'}
-      </p>
-      <p className="text-muted text-xs">Supports IMDb and Letterboxd exports</p>
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".csv"
-        onChange={handleFileChange}
-        className="hidden"
-      />
-    </div>
-  );
+  return <div className="w-full">{renderContent()}</div>;
 };
 
 export default CSVUpload;

@@ -37,7 +37,7 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
       >
         {/* Card */}
         <motion.div
-          className="relative w-full max-w-sm"
+          className="relative w-full max-w-sm max-h-[85svh] flex flex-col"
           initial={{ opacity: 0, scale: 0.85, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.85, y: 30 }}
@@ -47,14 +47,17 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute -top-3 -right-3 z-10 w-8 h-8 rounded-full bg-surface border border-border text-muted hover:text-text hover:border-accent transition-all duration-150 flex items-center justify-center text-sm cursor-pointer"
+            className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-surface border border-border text-muted hover:text-text hover:border-accent transition-all duration-150 flex items-center justify-center text-sm cursor-pointer"
           >
             ✕
           </button>
 
-          <MovieCard movie={movie} />
+          {/* Scrollable card body */}
+          <div className="overflow-y-auto rounded-xl">
+            <MovieCard movie={movie} />
+          </div>
 
-          <p className="text-center text-muted text-xs mt-4">
+          <p className="text-center text-muted text-xs mt-4 flex-shrink-0">
             Press{' '}
             <kbd className="px-1.5 py-0.5 bg-surface border border-border rounded text-xs">
               Esc
