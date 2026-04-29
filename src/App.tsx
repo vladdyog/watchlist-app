@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import React, { useEffect, useState } from 'react';
 
 import CSVUpload from './components/CSVUpload';
@@ -129,6 +130,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-bg flex flex-col">
+      <Analytics />
       <header className="border-b border-border py-6 text-center">
         <h1 className="font-display text-4xl font-normal text-text tracking-tight">
           CueMovie
