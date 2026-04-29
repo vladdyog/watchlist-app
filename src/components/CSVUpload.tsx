@@ -24,19 +24,22 @@ const EXPORT_GUIDES = [
   {
     source: 'IMDb',
     steps: [
-      'Go to your profile',
-      'Click `Watchlist`',
-      'Click `Export` (top right of the list)',
-      'Click the popup `Open exports page` and download the CSV from there',
+      'Sign in to IMDb and open your profile menu',
+      'Select `Your Watchlist`',
+      'Click the `Export this list` button near the top-right corner',
+      'IMDb will generate a CSV file for download',
+      'If prompted, click `Open exports page` and download the CSV from there',
+      'Upload the downloaded CSV file here',
     ],
   },
   {
     source: 'Letterboxd',
     steps: [
-      'Go to your profile',
-      'Click `Watchlist`',
-      'Click `Export Watchlist` (button on the right)',
-      'Choose how to name and where to save the CSV file and click `Save`',
+      'Sign in to Letterboxd and open your profile',
+      'Go to your `Watchlist`',
+      'Click the `Export Watchlist` button on the right side of the page',
+      'Choose where to save the CSV file and click `Save`',
+      'Upload the downloaded CSV file here',
     ],
   },
 ];
@@ -56,29 +59,37 @@ const ExportGuide: React.FC = () => {
         >
           ▶
         </span>
-        How do I export my watchlist?
+        How do I get my watchlist file?
       </button>
 
       {open && (
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          {EXPORT_GUIDES.map(({ source, steps }) => (
-            <div
-              key={source}
-              className="bg-surface border border-border rounded-lg px-4 py-3 text-left"
-            >
-              <p className="text-accent text-xs font-medium uppercase tracking-wider mb-2">
-                {source}
-              </p>
-              <ol className="space-y-1">
-                {steps.map((step, i) => (
-                  <li key={i} className="text-muted text-xs flex gap-2">
-                    <span className="text-border select-none">{i + 1}.</span>
-                    {step}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          ))}
+        <div className="mt-3">
+          <p className="text-muted text-xs text-center mb-3">
+            Export your watchlist as a CSV file from IMDb or Letterboxd, then
+            upload it here.
+          </p>
+
+          <div className="grid grid-cols-2 gap-3">
+            {EXPORT_GUIDES.map(({ source, steps }) => (
+              <div
+                key={source}
+                className="bg-surface border border-border rounded-lg px-4 py-3 text-left"
+              >
+                <p className="text-accent text-xs font-medium uppercase tracking-wider mb-2">
+                  {source}
+                </p>
+
+                <ol className="space-y-1">
+                  {steps.map((step, i) => (
+                    <li key={i} className="text-muted text-xs flex gap-2">
+                      <span className="text-border select-none">{i + 1}.</span>
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -257,8 +268,8 @@ const CSVUpload: React.FC<Props> = ({
           </div>
           <p className="text-text text-sm mb-1">
             {isDragging
-              ? 'Drop your CSV here'
-              : 'Drop your CSV here or click to browse'}
+              ? 'Drop your watchlist file here'
+              : 'Drop your watchlist file here or click to browse'}
           </p>
           <p className="text-muted text-xs">
             Supports IMDb and Letterboxd exports
