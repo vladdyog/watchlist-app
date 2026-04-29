@@ -15,6 +15,8 @@ const STORAGE_KEY = "watchlist";
 const DECK_KEY = "deck";
 const DECK_ENABLED_KEY = "deckEnabled";
 const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN as string;
+const APP_VERSION = import.meta.env.PACKAGE_VERSION;
+const AUTHOR = import.meta.env.AUTHOR;
 
 function loadFromStorage<T>(key: string): T | null {
   try {
@@ -127,18 +129,18 @@ const App: React.FC = () => {
   const filteredMovies = filterMovies(movies, filters);
 
   return (
-    <div className="min-h-screen bg-bg">
+    <div className="min-h-screen bg-bg flex flex-col">
       <header className="border-b border-border py-6 text-center">
         <h1 className="font-display text-4xl font-normal text-text tracking-tight">
-          Movie Picker
+          CueMovie
         </h1>
 
         <p className="text-muted text-sm mt-1.5">
-          Your watchlist. One random pick.
+          From your watchlist to tonight’s pick.
         </p>
       </header>
 
-      <main className="max-w-2xl mx-auto px-6 py-12 space-y-12">
+      <main className="flex-1 max-w-2xl mx-auto px-6 py-12 space-y-12">
         {/* Upload */}
         <Section title="Watchlist">
           <CSVUpload
@@ -240,6 +242,14 @@ const App: React.FC = () => {
           </>
         )}
       </main>
+      <footer className="border-t border-border mt-16 py-6 text-center">
+        <p className="text-xs text-muted">
+          CueMovie · v{APP_VERSION} · © 2026 {AUTHOR}
+        </p>
+        <a className="text-xs text-muted hover:underline" href="https://www.flaticon.com/free-icons/clapper" title="clapper icons">
+          Clapper icons created by Uniconlabs - Flaticon
+        </a>
+      </footer>
     </div>
   );
 };
