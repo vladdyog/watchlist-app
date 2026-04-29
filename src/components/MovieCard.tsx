@@ -1,5 +1,6 @@
-import React from "react";
-import type { Movie } from "../types";
+import React from 'react';
+
+import type { Movie } from '../types';
 
 type Props = {
   movie: Movie;
@@ -17,14 +18,14 @@ const MovieCard: React.FC<Props> = ({ movie, compact = false }) => {
     <div
       className={`
       bg-surface border border-border rounded-xl overflow-hidden
-      ${compact ? "flex gap-4 p-4" : "flex flex-col"}
+      ${compact ? 'flex gap-4 p-4' : 'flex flex-col'}
     `}
     >
       {/* Poster */}
       <div
         className={`
         bg-surface overflow-hidden flex-shrink-0
-        ${compact ? "w-16 h-24 rounded-lg" : "w-full aspect-[2/3]"}
+        ${compact ? 'w-16 h-24 rounded-lg' : 'w-full aspect-[2/3]'}
       `}
       >
         {movie.poster ? (
@@ -39,10 +40,10 @@ const MovieCard: React.FC<Props> = ({ movie, compact = false }) => {
       </div>
 
       {/* Info */}
-      <div className={`${compact ? "" : "p-4"} flex flex-col gap-2 min-w-0`}>
+      <div className={`${compact ? '' : 'p-4'} flex flex-col gap-2 min-w-0`}>
         {/* Title */}
         <p
-          className={`font-display text-text leading-tight ${compact ? "text-base" : "text-xl"}`}
+          className={`font-display text-text leading-tight ${compact ? 'text-base' : 'text-xl'}`}
         >
           {movie.title}
         </p>
@@ -55,7 +56,7 @@ const MovieCard: React.FC<Props> = ({ movie, compact = false }) => {
             movie.rating && `★ ${movie.rating.toFixed(1)}`,
           ]
             .filter(Boolean)
-            .join(" · ")}
+            .join(' · ')}
         </p>
 
         {/* Genre badges */}

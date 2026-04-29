@@ -1,7 +1,7 @@
-import type { Movie } from "../types";
+import type { Movie } from '../types';
 
-const TMDB_BASE = "https://api.themoviedb.org/3";
-const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w500";
+const TMDB_BASE = 'https://api.themoviedb.org/3';
+const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
 type TMDbSearchResult = {
   id: number;
@@ -30,12 +30,12 @@ async function searchMovie(
 ): Promise<TMDbSearchResult | null> {
   const params = new URLSearchParams({
     query: title,
-    include_adult: "false",
-    language: "en-US",
-    page: "1",
+    include_adult: 'false',
+    language: 'en-US',
+    page: '1',
   });
 
-  if (year) params.set("year", String(year));
+  if (year) params.set('year', String(year));
 
   const res = await fetch(`${TMDB_BASE}/search/movie?${params}`, {
     headers: { Authorization: `Bearer ${token}` },

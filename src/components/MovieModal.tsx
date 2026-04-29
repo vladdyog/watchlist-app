@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import MovieCard from "./MovieCard";
-import type { Movie } from "../types";
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect } from 'react';
+
+import type { Movie } from '../types';
+import MovieCard from './MovieCard';
 
 type Props = {
   movie: Movie;
@@ -11,10 +12,10 @@ type Props = {
 const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === 'Escape') onClose();
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
   return (
@@ -23,14 +24,14 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
       <motion.div
         className="fixed inset-0 z-50 flex items-center justify-center px-4"
         initial={{
-          backgroundColor: "rgba(0,0,0,0)",
-          backdropFilter: "blur(0px)",
+          backgroundColor: 'rgba(0,0,0,0)',
+          backdropFilter: 'blur(0px)',
         }}
         animate={{
-          backgroundColor: "rgba(0,0,0,0.75)",
-          backdropFilter: "blur(6px)",
+          backgroundColor: 'rgba(0,0,0,0.75)',
+          backdropFilter: 'blur(6px)',
         }}
-        exit={{ backgroundColor: "rgba(0,0,0,0)", backdropFilter: "blur(0px)" }}
+        exit={{ backgroundColor: 'rgba(0,0,0,0)', backdropFilter: 'blur(0px)' }}
         transition={{ duration: 0.2 }}
         onClick={onClose}
       >
@@ -54,10 +55,10 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
           <MovieCard movie={movie} />
 
           <p className="text-center text-muted text-xs mt-4">
-            Press{" "}
+            Press{' '}
             <kbd className="px-1.5 py-0.5 bg-surface border border-border rounded text-xs">
               Esc
-            </kbd>{" "}
+            </kbd>{' '}
             or click outside to close
           </p>
         </motion.div>

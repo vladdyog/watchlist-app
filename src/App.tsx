@@ -1,16 +1,21 @@
-import React, { useState, useEffect } from "react";
-import CSVUpload from "./components/CSVUpload";
-import MoviePicker from "./components/MoviePicker";
-import MovieFilters from "./components/MovieFilters";
-import MovieDeck from "./components/MovieDeck";
-import { enrichAllMovies } from "./utils/tmdb";
-import { filterMovies } from "./utils";
-import type { Movie, FilterOptions } from "./types";
+import React, { useEffect, useState } from 'react';
 
-const STORAGE_KEY = "watchlist";
-const DECK_KEY = "deck";
-const DECK_ENABLED_KEY = "deckEnabled";
+import CSVUpload from './components/CSVUpload';
+import MovieCard from './components/MovieCard';
+import MovieDeck from './components/MovieDeck';
+import MovieFilters from './components/MovieFilters';
+import MovieModal from './components/MovieModal';
+import MoviePicker from './components/MoviePicker';
+import type { FilterOptions, Movie } from './types';
+import { filterMovies } from './utils';
+import { enrichAllMovies } from './utils/tmdb';
+
+const STORAGE_KEY = 'watchlist';
+const DECK_KEY = 'deck';
+const DECK_ENABLED_KEY = 'deckEnabled';
 const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN as string;
+const APP_VERSION = import.meta.env.PACKAGE_VERSION;
+const AUTHOR = import.meta.env.AUTHOR;
 
 function loadFromStorage<T>(key: string): T | null {
   try {
@@ -29,22 +34,37 @@ const App: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>(
     () => loadFromStorage<Movie[]>(STORAGE_KEY) ?? [],
   );
+
   const [deck, setDeck] = useState<Movie[]>(
     () => loadFromStorage<Movie[]>(DECK_KEY) ?? [],
   );
+
   const [deckEnabled, setDeckEnabled] = useState<boolean>(
     () => loadFromStorage<boolean>(DECK_ENABLED_KEY) ?? false,
   );
+
   const [filters, setFilters] = useState<FilterOptions>({});
   const [error, setError] = useState<string | null>(null);
+
   const [progress, setProgress] = useState<{
     completed: number;
     total: number;
   } | null>(null);
+
   const [enrichmentTime, setEnrichmentTime] = useState<number | null>(null);
 
+  // Shared Last Pick
+  const [lastPick, setLastPick] = useState<Movie | null>(null);
+
+  // Deck session
+  const [shuffleActive, setShuffleActive] = useState(false);
+
+  const [showDeckWinnerModal, setShowDeckWinnerModal] = useState(false);
+
   useEffect(() => {
-    if (progress === null) saveToStorage(STORAGE_KEY, movies);
+    if (progress === null) {
+      saveToStorage(STORAGE_KEY, movies);
+    }
   }, [movies, progress]);
 
   useEffect(() => {
@@ -60,41 +80,66 @@ const App: React.FC = () => {
     setEnrichmentTime(null);
     setFilters({});
     setError(null);
+
     const start = performance.now();
+
     const enriched = await enrichAllMovies(
       rawMovies,
       TMDB_TOKEN,
       (completed, total) => setProgress({ completed, total }),
     );
+
     setMovies(enriched);
     setProgress(null);
     setEnrichmentTime((performance.now() - start) / 1000);
   };
 
   const handleMoviePicked = (movie: Movie) => {
-    if (!deckEnabled) return;
+    // Normal picker mode
+    if (!deckEnabled) {
+      setLastPick(movie);
+      return;
+    }
+
+    // Deck mode — only add to deck
     setDeck((prev) =>
       prev.some((m) => m.title === movie.title) ? prev : [...prev, movie],
     );
+  };
+
+  const handleShuffleStart = () => {
+    setShuffleActive(true);
+  };
+
+  // Confirmed winner only
+  const handleWatchThis = (winner: Movie) => {
+    // Winner becomes Last Pick
+    setLastPick(winner);
+
+    // Clear deck session
+    setDeck([]);
+  };
+
+  const handleDeckClose = () => {
+    setShuffleActive(false);
   };
 
   const isEnriching = progress !== null;
   const filteredMovies = filterMovies(movies, filters);
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* Header */}
+    <div className="min-h-screen bg-bg flex flex-col">
       <header className="border-b border-border py-6 text-center">
         <h1 className="font-display text-4xl font-normal text-text tracking-tight">
-          Movie Picker
+          CueMovie
         </h1>
+
         <p className="text-muted text-sm mt-1.5">
-          Your watchlist. One random pick.
+          From your watchlist to tonight’s pick.
         </p>
       </header>
 
-      {/* Content */}
-      <main className="max-w-2xl mx-auto px-6 py-12 space-y-12">
+      <main className="flex-1 max-w-2xl mx-auto px-6 py-12 space-y-12">
         {/* Upload */}
         <Section title="Watchlist">
           <CSVUpload
@@ -105,6 +150,7 @@ const App: React.FC = () => {
             onMoviesLoaded={handleMoviesLoaded}
             onError={setError}
           />
+
           {error && <p className="text-danger text-sm mt-3">{error}</p>}
         </Section>
 
@@ -117,18 +163,19 @@ const App: React.FC = () => {
                 filters={filters}
                 onChange={setFilters}
               />
+
               <p className="text-muted text-sm mt-3">
                 {filteredMovies.length} / {movies.length} movies match
               </p>
             </Section>
 
-            {/* Picker + optional Deck */}
+            {/* Picker */}
             <section>
-              {/* Header — title and toggle always on the same row */}
               <div className="flex items-center justify-between mb-5 pb-2.5 border-b border-border">
                 <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest">
                   Pick a Movie
                 </h2>
+
                 <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
                   <input
                     type="checkbox"
@@ -140,43 +187,85 @@ const App: React.FC = () => {
                 </label>
               </div>
 
-              {/* Button — always here, same position */}
               <MoviePicker
                 movies={filteredMovies}
                 onMoviePicked={handleMoviePicked}
-                wheelEnabled={deckEnabled}
+                deckEnabled={deckEnabled}
+                shuffleActive={shuffleActive}
+                lastPick={lastPick}
               />
 
-              {/* Deck — slides in directly below with no heavy separator */}
               {deckEnabled && (
                 <div className="mt-2">
                   <MovieDeck
                     movies={deck}
+                    shuffleActive={shuffleActive}
+                    onShuffleStart={handleShuffleStart}
+                    onWatchThis={handleWatchThis}
+                    onClose={handleDeckClose}
                     onRemove={(m) =>
-                      setDeck((prev) =>
-                        prev.filter((w) => w.title !== m.title),
-                      )
+                      setDeck((prev) => prev.filter((w) => w.title !== m.title))
                     }
                     onClear={() => setDeck([])}
                   />
                 </div>
               )}
+
+              {/* Deck mode Last Pick */}
+              {deckEnabled && lastPick && !shuffleActive && (
+                <div className="mt-8">
+                  <p className="text-muted text-xs uppercase tracking-wider mb-3 text-center">
+                    Last pick
+                  </p>
+
+                  <div
+                    className="w-full max-w-sm mx-auto cursor-pointer"
+                    onClick={() => setShowDeckWinnerModal(true)}
+                  >
+                    <MovieCard movie={lastPick} compact />
+                  </div>
+
+                  <p className="text-center text-muted text-xs mt-2">
+                    Click to expand
+                  </p>
+                </div>
+              )}
+
+              {showDeckWinnerModal && lastPick && (
+                <MovieModal
+                  movie={lastPick}
+                  onClose={() => setShowDeckWinnerModal(false)}
+                />
+              )}
             </section>
           </>
         )}
       </main>
+      <footer className="border-t border-border mt-16 py-6 text-center">
+        <p className="text-xs text-muted">
+          CueMovie · v{APP_VERSION} · © 2026 {AUTHOR}
+        </p>
+        <a
+          className="text-xs text-muted hover:underline"
+          href="https://www.flaticon.com/free-icons/clapper"
+          title="clapper icons"
+        >
+          Clapper icons created by Uniconlabs - Flaticon
+        </a>
+      </footer>
     </div>
   );
 };
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({
-  title,
-  children,
-}) => (
+const Section: React.FC<{
+  title: string;
+  children: React.ReactNode;
+}> = ({ title, children }) => (
   <section>
     <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest mb-5 pb-2.5 border-b border-border">
       {title}
     </h2>
+
     {children}
   </section>
 );

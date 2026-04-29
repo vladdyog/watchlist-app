@@ -1,9 +1,9 @@
 ---
 name: REFACTOR
 about: Template for REFACTOR Issues.
-title: ""
+title: ''
 labels: refactor
-assignees: ""
+assignees: ''
 ---
 
 ### Preamble

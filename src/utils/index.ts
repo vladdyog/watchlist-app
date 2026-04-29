@@ -1,14 +1,15 @@
-import Papa from "papaparse";
-import type { Movie } from "../types";
+import Papa from 'papaparse';
 
-type CSVSource = "imdb" | "letterboxd" | "unknown";
+import type { Movie } from '../types';
+
+type CSVSource = 'imdb' | 'letterboxd' | 'unknown';
 
 function detectSource(headers: string[]): CSVSource {
-  if (headers.includes("Title") && headers.includes("Title Type"))
-    return "imdb";
-  if (headers.includes("Name") && headers.includes("Letterboxd URI"))
-    return "letterboxd";
-  return "unknown";
+  if (headers.includes('Title') && headers.includes('Title Type'))
+    return 'imdb';
+  if (headers.includes('Name') && headers.includes('Letterboxd URI'))
+    return 'letterboxd';
+  return 'unknown';
 }
 
 // Only extracts title, year, and dateAdded — everything else comes from TMDb
@@ -24,28 +25,28 @@ export function normalizeMovies(rows: Record<string, string>[]): Movie[] {
       let year: number | undefined;
       let dateAdded: string | undefined;
 
-      if (source === "imdb") {
-        title = row["Title"] ?? "";
-        year = Number(row["Year"]) || undefined;
-        dateAdded = row["Created"] ?? undefined;
-      } else if (source === "letterboxd") {
-        title = row["Name"] ?? "";
-        year = Number(row["Year"]) || undefined;
-        dateAdded = row["Date"] ?? undefined;
+      if (source === 'imdb') {
+        title = row['Title'] ?? '';
+        year = Number(row['Year']) || undefined;
+        dateAdded = row['Created'] ?? undefined;
+      } else if (source === 'letterboxd') {
+        title = row['Name'] ?? '';
+        year = Number(row['Year']) || undefined;
+        dateAdded = row['Date'] ?? undefined;
       } else {
         title =
-          row["Title"] ?? row["title"] ?? row["Name"] ?? row["name"] ?? "";
-        year = Number(row["Year"] ?? row["year"]) || undefined;
+          row['Title'] ?? row['title'] ?? row['Name'] ?? row['name'] ?? '';
+        year = Number(row['Year'] ?? row['year']) || undefined;
       }
 
       return { title: title.trim(), year, dateAdded };
     })
-    .filter((movie) => movie.title !== "");
+    .filter((movie) => movie.title !== '');
 }
 
 export function filterMovies(
   movies: Movie[],
-  filters: import("../types").FilterOptions,
+  filters: import('../types').FilterOptions,
 ): Movie[] {
   return movies.filter((movie) => {
     if (
