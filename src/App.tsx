@@ -54,10 +54,8 @@ const App: React.FC = () => {
 
   const [enrichmentTime, setEnrichmentTime] = useState<number | null>(null);
 
-  // Shared Last Pick
   const [lastPick, setLastPick] = useState<Movie | null>(null);
 
-  // Deck session
   const [shuffleActive, setShuffleActive] = useState(false);
 
   const [showDeckWinnerModal, setShowDeckWinnerModal] = useState(false);
@@ -96,13 +94,11 @@ const App: React.FC = () => {
   };
 
   const handleMoviePicked = (movie: Movie) => {
-    // Normal picker mode
     if (!deckEnabled) {
       setLastPick(movie);
       return;
     }
 
-    // Deck mode — only add to deck
     setDeck((prev) =>
       prev.some((m) => m.title === movie.title) ? prev : [...prev, movie],
     );
@@ -112,12 +108,8 @@ const App: React.FC = () => {
     setShuffleActive(true);
   };
 
-  // Confirmed winner only
   const handleWatchThis = (winner: Movie) => {
-    // Winner becomes Last Pick
     setLastPick(winner);
-
-    // Clear deck session
     setDeck([]);
   };
 
@@ -131,18 +123,20 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-bg flex flex-col">
       <Analytics />
-      <header className="border-b border-border py-6 text-center">
-        <h1 className="font-display text-4xl font-normal text-text tracking-tight">
-          CueMovie
-        </h1>
 
-        <p className="text-muted text-sm mt-1.5">
-          From your watchlist to tonight's pick.
-        </p>
+      <header className="sticky top-0 z-30 border-b border-border/60 bg-bg/85 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-6 py-8 text-center">
+          <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight text-white">
+            CueMovie
+          </h1>
+
+          <p className="text-muted text-base sm:text-lg mt-3 font-medium">
+            From your watchlist to tonight&apos;s pick.
+          </p>
+        </div>
       </header>
 
-      <main className="flex-1 w-full max-w-2xl mx-auto px-6 py-12 space-y-12">
-        {/* Upload */}
+      <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-10 sm:py-14 space-y-14">
         <Section title="Watchlist">
           <CSVUpload
             movieCount={movies.length}
@@ -153,12 +147,13 @@ const App: React.FC = () => {
             onError={setError}
           />
 
-          {error && <p className="text-danger text-sm mt-3">{error}</p>}
+          {error && (
+            <p className="text-danger text-sm mt-4 font-medium">{error}</p>
+          )}
         </Section>
 
         {!isEnriching && movies.length > 0 && (
           <>
-            {/* Filters */}
             <Section title="Filters">
               <MovieFilters
                 movies={movies}
@@ -166,26 +161,32 @@ const App: React.FC = () => {
                 onChange={setFilters}
               />
 
-              <p className="text-muted text-sm mt-3">
+              <p className="text-muted text-sm mt-5">
                 {filteredMovies.length} / {movies.length} movies match
               </p>
             </Section>
 
-            {/* Picker */}
             <section>
-              <div className="flex items-center justify-between mb-5 pb-2.5 border-b border-border">
-                <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest">
-                  Pick a Movie
-                </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                <div>
+                  <h2 className="font-display text-2xl font-bold tracking-tight text-white">
+                    Pick a Movie
+                  </h2>
 
-                <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
+                  <p className="text-muted text-sm mt-1">
+                    Let the app decide your next watch.
+                  </p>
+                </div>
+
+                <label className="flex items-center gap-3 text-sm text-muted cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={deckEnabled}
                     onChange={(e) => setDeckEnabled(e.target.checked)}
-                    className="accent-accent w-3.5 h-3.5"
+                    className="accent-accent w-4 h-4"
                   />
-                  DECK MODE
+
+                  <span className="font-medium">Deck mode</span>
                 </label>
               </div>
 
@@ -198,7 +199,7 @@ const App: React.FC = () => {
               />
 
               {deckEnabled && (
-                <div className="mt-2">
+                <div className="mt-6">
                   <MovieDeck
                     movies={deck}
                     shuffleActive={shuffleActive}
@@ -213,23 +214,24 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              {/* Deck mode Last Pick */}
               {deckEnabled && lastPick && !shuffleActive && (
-                <div className="mt-8">
-                  <p className="text-muted text-xs uppercase tracking-wider mb-3 text-center">
-                    Last pick
-                  </p>
+                <div className="mt-14">
+                  <div className="text-center mb-6">
+                    <p className="text-accent text-sm font-semibold tracking-wide">
+                      Tonight&apos;s Pick
+                    </p>
+
+                    <p className="text-muted text-sm mt-1">
+                      Click to expand details
+                    </p>
+                  </div>
 
                   <div
-                    className="w-full max-w-sm mx-auto cursor-pointer"
+                    className="w-full max-w-md mx-auto cursor-pointer"
                     onClick={() => setShowDeckWinnerModal(true)}
                   >
                     <MovieCard movie={lastPick} compact />
                   </div>
-
-                  <p className="text-center text-muted text-xs mt-2">
-                    Click to expand
-                  </p>
                 </div>
               )}
 
@@ -243,17 +245,21 @@ const App: React.FC = () => {
           </>
         )}
       </main>
-      <footer className="border-t border-border mt-16 py-6 text-center">
-        <p className="text-xs text-muted">
-          CueMovie · v{APP_VERSION} · © 2026 {AUTHOR}
-        </p>
-        <a
-          className="text-xs text-muted hover:underline"
-          href="https://www.flaticon.com/free-icons/clapper"
-          title="clapper icons"
-        >
-          Clapper icons created by Uniconlabs - Flaticon
-        </a>
+
+      <footer className="border-t border-border/60 mt-16">
+        <div className="max-w-6xl mx-auto px-6 py-8 text-center">
+          <p className="text-sm text-muted">
+            CueMovie · v{APP_VERSION} · © 2026 {AUTHOR}
+          </p>
+
+          <a
+            className="text-sm text-muted hover:text-text transition-colors duration-200 mt-2 inline-block"
+            href="https://www.flaticon.com/free-icons/clapper"
+            title="clapper icons"
+          >
+            Clapper icons created by Uniconlabs - Flaticon
+          </a>
+        </div>
       </footer>
     </div>
   );
@@ -263,10 +269,16 @@ const Section: React.FC<{
   title: string;
   children: React.ReactNode;
 }> = ({ title, children }) => (
-  <section>
-    <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest mb-5 pb-2.5 border-b border-border">
-      {title}
-    </h2>
+  <section className="space-y-6">
+    <div className="flex items-center gap-4">
+      <div className="h-px flex-1 bg-border" />
+
+      <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-white whitespace-nowrap">
+        {title}
+      </h2>
+
+      <div className="h-px flex-1 bg-border" />
+    </div>
 
     {children}
   </section>

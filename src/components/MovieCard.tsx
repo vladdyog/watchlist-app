@@ -8,7 +8,7 @@ type Props = {
 };
 
 const PLACEHOLDER = (
-  <div className="w-full h-full flex items-center justify-center bg-surface text-muted text-4xl">
+  <div className="w-full h-full flex items-center justify-center bg-surface-elevated text-muted text-5xl">
     🎬
   </div>
 );
@@ -17,39 +17,51 @@ const MovieCard: React.FC<Props> = ({ movie, compact = false }) => {
   return (
     <div
       className={`
-      bg-surface border border-border rounded-xl overflow-hidden
-      ${compact ? 'flex gap-4 p-4' : 'flex flex-col'}
-    `}
+        group
+        bg-surface/95
+        border border-border/70
+        rounded-2xl
+        overflow-hidden
+        shadow-[0_12px_40px_rgba(0,0,0,0.35)]
+        hover:border-accent/30
+        hover:-translate-y-1
+        transition-all duration-300
+        backdrop-blur-sm
+        ${compact ? 'flex gap-5 p-5 items-start' : 'flex flex-col'}
+      `}
     >
-      {/* Poster */}
       <div
         className={`
-        bg-surface overflow-hidden flex-shrink-0
-        ${compact ? 'w-16 h-24 rounded-lg' : 'w-full aspect-[2/3]'}
-      `}
+          overflow-hidden flex-shrink-0 bg-surface-elevated
+          ${compact ? 'w-20 h-28 rounded-xl' : 'w-full aspect-[2/3]'}
+        `}
       >
         {movie.poster ? (
           <img
             src={movie.poster}
             alt={movie.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           PLACEHOLDER
         )}
       </div>
 
-      {/* Info */}
-      <div className={`${compact ? '' : 'p-4'} flex flex-col gap-2 min-w-0`}>
-        {/* Title */}
-        <p
-          className={`font-display text-text leading-tight ${compact ? 'text-base' : 'text-xl'}`}
+      <div className={`${compact ? 'flex-1 min-w-0' : 'p-6'} flex flex-col`}>
+        <h3
+          className={`
+            font-display
+            font-bold
+            tracking-tight
+            leading-tight
+            text-white
+            ${compact ? 'text-xl' : 'text-3xl'}
+          `}
         >
           {movie.title}
-        </p>
+        </h3>
 
-        {/* Meta row */}
-        <p className="text-muted text-xs">
+        <p className="text-muted text-sm font-medium mt-3">
           {[
             movie.year,
             movie.runtime && `${movie.runtime} min`,
@@ -59,13 +71,20 @@ const MovieCard: React.FC<Props> = ({ movie, compact = false }) => {
             .join(' · ')}
         </p>
 
-        {/* Genre badges */}
         {movie.genres && movie.genres.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-2 mt-4">
             {movie.genres.map((genre) => (
               <span
                 key={genre}
-                className="text-xs px-2 py-0.5 rounded-full border border-border text-muted"
+                className="
+                  text-xs
+                  px-3 py-1
+                  rounded-full
+                  bg-white/5
+                  border border-white/8
+                  text-muted
+                  backdrop-blur-sm
+                "
               >
                 {genre}
               </span>
@@ -73,9 +92,8 @@ const MovieCard: React.FC<Props> = ({ movie, compact = false }) => {
           </div>
         )}
 
-        {/* Overview — full card only */}
         {!compact && movie.overview && (
-          <p className="text-text/70 text-sm leading-relaxed mt-1">
+          <p className="text-muted text-[15px] leading-7 mt-6">
             {movie.overview}
           </p>
         )}

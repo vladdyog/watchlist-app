@@ -27,7 +27,6 @@ const MoviePicker: React.FC<Props> = ({
 
     const movie = movies[Math.floor(Math.random() * movies.length)];
 
-    // Normal mode only updates Last Pick
     if (!deckEnabled) {
       setShowModal(true);
     }
@@ -40,32 +39,50 @@ const MoviePicker: React.FC<Props> = ({
   const label = deckEnabled
     ? 'Add to deck'
     : lastPick
-      ? 'Pick another'
+      ? 'Pick another movie'
       : 'Pick a movie';
 
   return (
-    <div className="flex flex-col items-center gap-6 py-4">
+    <div className="flex flex-col items-center gap-8 py-6">
       {isEmpty ? (
-        <div className="flex flex-col items-center gap-2 py-4">
-          <p className="text-text text-sm">No movies match your filters</p>
-          <p className="text-muted text-xs">
-            Try adjusting or resetting the filters above
+        <div className="bg-surface/70 border border-border rounded-2xl px-8 py-10 text-center max-w-md w-full">
+          <p className="text-white text-lg font-semibold">
+            No movies match your filters
+          </p>
+
+          <p className="text-muted text-sm mt-2 leading-relaxed">
+            Try adjusting your filters or resetting them to see more results.
           </p>
         </div>
       ) : (
         !shuffleActive && (
           <motion.button
             onClick={pickRandom}
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
             className={`
-              px-12 py-4 rounded-full cursor-pointer
-              text-sm font-normal u
+              relative overflow-hidden
+              px-10 py-4 rounded-2xl
+              font-semibold text-sm tracking-wide
+              transition-all duration-300
+              cursor-pointer
+              shadow-[0_10px_30px_rgba(0,0,0,0.3)]
               ${
                 deckEnabled
-                  ? 'bg-surface border border-border text-text hover:border-accent/50'
-                  : 'bg-accent text-bg shadow-lg shadow-accent/25 hover:bg-accent-hover'
+                  ? `
+                    bg-surface-elevated
+                    border border-border
+                    text-white
+                    hover:border-accent/40
+                    hover:bg-surface
+                  `
+                  : `
+                    bg-accent
+                    text-bg
+                    hover:bg-accent-hover
+                    shadow-[0_10px_35px_rgba(255,184,77,0.25)]
+                  `
               }
             `}
           >
@@ -74,26 +91,33 @@ const MoviePicker: React.FC<Props> = ({
         )
       )}
 
-      {/* Modal */}
       {showModal && lastPick && (
         <MovieModal movie={lastPick} onClose={() => setShowModal(false)} />
       )}
 
-      {/* Last Pick — normal mode only */}
       {!deckEnabled && (
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {lastPick && !showModal && (
             <motion.div
               key={lastPick.title}
-              className="w-full max-w-sm"
-              initial={{ opacity: 0, y: 8 }}
+              className="w-full max-w-md"
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{
+                duration: 0.25,
+                ease: [0.22, 1, 0.36, 1],
+              }}
             >
-              <p className="text-muted text-xs uppercase tracking-wider mb-3 text-center">
-                Last pick
-              </p>
+              <div className="text-center mb-5">
+                <p className="text-accent text-sm font-semibold tracking-wide">
+                  Tonight&apos;s Pick
+                </p>
+
+                <p className="text-muted text-sm mt-1">
+                  Click to expand details
+                </p>
+              </div>
 
               <div
                 className="cursor-pointer"
@@ -101,10 +125,6 @@ const MoviePicker: React.FC<Props> = ({
               >
                 <MovieCard movie={lastPick} compact />
               </div>
-
-              <p className="text-center text-muted text-xs mt-2">
-                Click to expand
-              </p>
             </motion.div>
           )}
         </AnimatePresence>

@@ -14,13 +14,14 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
+
     window.addEventListener('keydown', handler);
+
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
 
   return (
     <AnimatePresence>
-      {/* Backdrop */}
       <motion.div
         className="fixed inset-0 z-50 flex items-center justify-center px-4"
         initial={{
@@ -28,38 +29,57 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
           backdropFilter: 'blur(0px)',
         }}
         animate={{
-          backgroundColor: 'rgba(0,0,0,0.75)',
-          backdropFilter: 'blur(6px)',
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          backdropFilter: 'blur(10px)',
         }}
-        exit={{ backgroundColor: 'rgba(0,0,0,0)', backdropFilter: 'blur(0px)' }}
-        transition={{ duration: 0.2 }}
+        exit={{
+          backgroundColor: 'rgba(0,0,0,0)',
+          backdropFilter: 'blur(0px)',
+        }}
+        transition={{ duration: 0.25 }}
         onClick={onClose}
       >
-        {/* Card */}
         <motion.div
-          className="relative w-full max-w-sm max-h-[85svh] flex flex-col"
-          initial={{ opacity: 0, scale: 0.85, y: 30 }}
+          className="relative w-full max-w-md max-h-[90svh] flex flex-col"
+          initial={{ opacity: 0, scale: 0.9, y: 40 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.85, y: 30 }}
-          transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+          exit={{ opacity: 0, scale: 0.9, y: 40 }}
+          transition={{
+            duration: 0.35,
+            ease: [0.22, 1, 0.36, 1],
+          }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-surface border border-border text-muted hover:text-text hover:border-accent transition-all duration-150 flex items-center justify-center text-sm cursor-pointer"
+            className="
+              absolute -top-4 -right-4
+              z-10
+              w-10 h-10
+              rounded-full
+              bg-surface-elevated/95
+              backdrop-blur-md
+              border border-border
+              text-muted
+              hover:text-white
+              hover:border-accent/50
+              transition-all duration-200
+              flex items-center justify-center
+              text-sm
+              shadow-lg
+              cursor-pointer
+            "
           >
             ✕
           </button>
 
-          {/* Scrollable card body */}
-          <div className="overflow-y-auto rounded-xl">
+          <div className="overflow-y-auto rounded-2xl">
             <MovieCard movie={movie} />
           </div>
 
-          <p className="text-center text-muted text-xs mt-4 flex-shrink-0">
+          <p className="text-center text-muted text-sm mt-5">
             Press{' '}
-            <kbd className="px-1.5 py-0.5 bg-surface border border-border rounded text-xs">
+            <kbd className="px-2 py-1 bg-surface-elevated border border-border rounded-md text-xs">
               Esc
             </kbd>{' '}
             or click outside to close

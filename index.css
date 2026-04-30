@@ -1,30 +1,57 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --color-bg: #0f0f0f;
-  --color-surface: #1a1a1a;
-  --color-border: #2a2a2a;
-  --color-text: #f0ead6;
-  --color-muted: #7a7060;
-  --color-accent: #e8a020;
-  --color-accent-hover: #f0b030;
-  --color-danger: #e05050;
+  --color-bg: #111315;
 
-  --font-display: 'DM Serif Display', serif;
-  --font-body: 'DM Sans', sans-serif;
+  --color-surface: #1a1d21;
+  --color-surface-elevated: #23272d;
+
+  --color-border: #2d3238;
+
+  --color-text: #f5f7fa;
+  --color-muted: #9aa4af;
+
+  --color-accent: #ffb84d;
+  --color-accent-hover: #ffc76a;
+
+  --color-danger: #ff6b6b;
+
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: var(--color-bg);
+  background:
+    radial-gradient(circle at top, rgba(255, 184, 77, 0.08), transparent 30%),
+    var(--color-bg);
+
   color: var(--color-text);
+
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+
+  min-height: 100vh;
+
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(255, 184, 77, 0.3);
+}
+
+img {
+  display: block;
 }
 
 input[type='number']::-webkit-inner-spin-button,

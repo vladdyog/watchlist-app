@@ -11,25 +11,23 @@ type Props = {
   onClear: () => void;
   shuffleActive: boolean;
   onShuffleStart: () => void;
-  /** Called with the confirmed winner. Does NOT close the overlay — onClose does. */
   onWatchThis: (movie: Movie) => void;
   onClose: () => void;
 };
 
-const CARD_WIDTH = 120;
-const CARD_HEIGHT = 180;
-const CARD_OFFSET = 40;
+const CARD_WIDTH = 140;
+const CARD_HEIGHT = 210;
+const CARD_OFFSET = 52;
 const SHUFFLE_DURATION = 3500;
-const OVERLAY_SCALE = 1.65;
+const OVERLAY_SCALE = 1.75;
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
 
 const getFanRotation = (i: number, total: number) => {
   const center = (total - 1) / 2;
-  return (i - center) * 2.5;
+  return (i - center) * 3;
 };
 
-// ── Poster card ───────────────────────────────────────────────────────────────
 const PosterCard: React.FC<{
   movie: Movie;
   index: number;
@@ -60,6 +58,7 @@ const PosterCard: React.FC<{
   onRemove,
 }) => {
   const isLifted = isHovered || isActive || isWinner;
+
   const showInfo = (isHovered || isWinner) && !isShuffling;
 
   return (
@@ -73,15 +72,19 @@ const PosterCard: React.FC<{
         originX: '50%',
         originY: '100%',
         zIndex: isLifted ? 50 : index,
-        perspective: '600px',
+        perspective: '1000px',
       }}
       animate={{
         x: nudge,
-        y: isLifted ? -70 : 0,
+        y: isLifted ? -88 : 0,
         rotate: isLifted ? 0 : getFanRotation(index, total),
         scale: isLifted ? 1.08 : 1,
       }}
-      transition={{ type: 'spring', stiffness: 200, damping: 32 }}
+      transition={{
+        type: 'spring',
+        stiffness: 220,
+        damping: 28,
+      }}
       onHoverStart={() => !isShuffling && onHoverStart()}
       onHoverEnd={onHoverEnd}
       onClick={onClick}
@@ -94,78 +97,94 @@ const PosterCard: React.FC<{
           position: 'relative',
         }}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.5, ease: 'easeInOut' }}
+        transition={{ duration: 0.55, ease: 'easeInOut' }}
       >
-        {/* Front */}
+        {/* FRONT */}
         <div
           className={`
-            absolute inset-0 rounded-xl overflow-hidden border-2 transition-colors duration-200
+            absolute inset-0 overflow-hidden rounded-[1.6rem]
+            border transition-all duration-300
             ${
               isWinner
-                ? 'border-accent shadow-xl shadow-accent/40'
+                ? 'border-accent shadow-[0_0_40px_rgba(255,170,60,0.45)]'
                 : isActive
-                  ? 'border-accent/50'
+                  ? 'border-accent/60 shadow-[0_0_24px_rgba(255,170,60,0.18)]'
                   : isHovered
-                    ? 'border-accent'
-                    : 'border-border'
+                    ? 'border-white/20'
+                    : 'border-white/10'
             }
           `}
-          style={{ backfaceVisibility: 'hidden' }}
+          style={{
+            backfaceVisibility: 'hidden',
+          }}
         >
+          {/* Remove button */}
           <AnimatePresence>
             {isHovered && !isShuffling && !isFlipped && (
               <motion.button
-                initial={{ opacity: 0, scale: 0.6 }}
+                initial={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.6 }}
+                exit={{ opacity: 0, scale: 0.7 }}
                 transition={{ duration: 0.15 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemove();
                 }}
-                className="absolute top-1 right-1 z-50 w-6 h-6 rounded-full bg-black/70 text-white text-xs flex items-center justify-center hover:bg-red-500 transition"
+                className="
+                  absolute right-2 top-2 z-50
+                  flex h-7 w-7 items-center justify-center
+                  rounded-full border border-white/10
+                  bg-black/70 text-xs text-white
+                  backdrop-blur-md
+                  transition-all duration-200
+                  hover:border-red-400/40 hover:bg-red-500
+                "
               >
                 ✕
               </motion.button>
             )}
           </AnimatePresence>
 
+          {/* Poster */}
           {movie.poster ? (
-            <img
-              src={movie.poster}
-              alt={movie.title}
-              className="w-full h-full object-cover"
-            />
+            <>
+              <img
+                src={movie.poster}
+                alt={movie.title}
+                className="h-full w-full object-cover"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+            </>
           ) : (
-            <div className="w-full h-full bg-surface flex items-center justify-center text-3xl">
+            <div className="flex h-full w-full items-center justify-center bg-surface text-5xl">
               🎬
             </div>
           )}
 
+          {/* Info overlay */}
           <AnimatePresence>
             {showInfo && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="absolute inset-0 rounded-xl flex flex-col justify-end p-2"
-                style={{
-                  background:
-                    'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 55%)',
-                }}
+                transition={{ duration: 0.18 }}
+                className="absolute inset-x-0 bottom-0 p-4"
               >
-                <p className="text-white text-xs font-medium leading-tight line-clamp-2">
+                <p className="line-clamp-2 text-sm font-semibold leading-tight text-white">
                   {movie.title}
                 </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
+
+                <div className="mt-2 flex items-center gap-2">
                   {movie.year && (
-                    <p className="text-white/60 text-xs">{movie.year}</p>
+                    <span className="text-xs text-white/60">{movie.year}</span>
                   )}
+
                   {movie.rating && (
-                    <p className="text-accent text-xs">
+                    <span className="rounded-full bg-accent/20 px-2 py-0.5 text-xs font-medium text-accent">
                       ★ {movie.rating.toFixed(1)}
-                    </p>
+                    </span>
                   )}
                 </div>
               </motion.div>
@@ -173,19 +192,26 @@ const PosterCard: React.FC<{
           </AnimatePresence>
         </div>
 
-        {/* Back */}
+        {/* BACK */}
         <div
-          className="absolute inset-0 rounded-xl border-2 border-border bg-surface flex items-center justify-center"
-          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+          className="
+            absolute inset-0 flex items-center justify-center
+            rounded-[1.6rem] border border-white/10
+            bg-gradient-to-br from-[#181818] to-[#101010]
+            shadow-2xl
+          "
+          style={{
+            backfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+          }}
         >
-          <div className="text-4xl opacity-20">🎬</div>
+          <div className="text-5xl opacity-15">🎬</div>
         </div>
       </motion.div>
     </motion.div>
   );
 };
 
-// ── Main ──────────────────────────────────────────────────────────────────────
 const MovieDeck: React.FC<Props> = ({
   movies,
   onRemove,
@@ -196,19 +222,23 @@ const MovieDeck: React.FC<Props> = ({
   onClose,
 }) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
   const [isShuffling, setIsShuffling] = useState(false);
+
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  // Single source of truth: the actual winner object — no title-based lookup.
+
   const [winnerMovie, setWinnerMovie] = useState<Movie | null>(null);
-  // True once the user (or auto-win) confirms the pick; overlay transforms to reveal screen.
+
   const [watchAccepted, setWatchAccepted] = useState(false);
+
   const [modalMovie, setModalMovie] = useState<Movie | null>(null);
+
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
 
   const animRef = useRef<number | null>(null);
+
   const startTimeRef = useRef<number | null>(null);
 
-  // If the current winner card is removed before it's been accepted, reset.
   useEffect(() => {
     if (
       !watchAccepted &&
@@ -221,51 +251,66 @@ const MovieDeck: React.FC<Props> = ({
     }
   }, [movies, winnerMovie, watchAccepted]);
 
-  // Scroll-lock while overlay is open.
   useEffect(() => {
     if (shuffleActive) {
       document.body.style.overflow = 'hidden';
+
       return () => {
         document.body.style.overflow = '';
       };
     }
   }, [shuffleActive]);
 
-  // Full reset when overlay is dismissed (X button or App-level close).
   const prevShuffleRef = useRef(false);
+
   useEffect(() => {
     if (prevShuffleRef.current && !shuffleActive) {
-      if (animRef.current) cancelAnimationFrame(animRef.current);
+      if (animRef.current) {
+        cancelAnimationFrame(animRef.current);
+      }
+
       setIsShuffling(false);
       setWinnerMovie(null);
       setWatchAccepted(false);
       setActiveIndex(null);
       setFlippedCards(new Set());
     }
+
     prevShuffleRef.current = shuffleActive;
   }, [shuffleActive]);
 
-  // ── Animation ──────────────────────────────────────────────────────────────
   const runSpin = (pool: Movie[]) => {
     if (pool.length < 2) return;
-    if (animRef.current) cancelAnimationFrame(animRef.current);
+
+    if (animRef.current) {
+      cancelAnimationFrame(animRef.current);
+    }
 
     const picked = Math.floor(Math.random() * pool.length);
+
     const totalTicks = 5 * pool.length + picked;
 
     setWinnerMovie(null);
     setWatchAccepted(false);
     setHoveredIndex(null);
     setActiveIndex(0);
+
     setFlippedCards(new Set(pool.map((_, i) => i)));
+
     setIsShuffling(true);
+
     startTimeRef.current = null;
 
     setTimeout(() => {
       const animate = (ts: number) => {
-        if (!startTimeRef.current) startTimeRef.current = ts;
+        if (!startTimeRef.current) {
+          startTimeRef.current = ts;
+        }
+
         const elapsed = ts - startTimeRef.current;
+
         const progress = Math.min(elapsed / SHUFFLE_DURATION, 1);
+
         setActiveIndex(
           Math.floor(easeOut(progress) * totalTicks) % pool.length,
         );
@@ -274,20 +319,25 @@ const MovieDeck: React.FC<Props> = ({
           animRef.current = requestAnimationFrame(animate);
         } else {
           setActiveIndex(picked);
+
           setFlippedCards((prev) => {
-            const n = new Set(prev);
-            n.delete(picked);
-            return n;
+            const next = new Set(prev);
+
+            next.delete(picked);
+
+            return next;
           });
-          setWinnerMovie(pool[picked]); // store the full object — no title lookup needed
+
+          setWinnerMovie(pool[picked]);
+
           setIsShuffling(false);
         }
       };
+
       animRef.current = requestAnimationFrame(animate);
-    }, 600);
+    }, 700);
   };
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
   const handleShuffle = () => {
     onShuffleStart();
     runSpin(movies);
@@ -295,31 +345,40 @@ const MovieDeck: React.FC<Props> = ({
 
   const handleWatchThis = () => {
     if (!winnerMovie) return;
+
     setWatchAccepted(true);
-    onWatchThis(winnerMovie); // App stores deckWinner + clears deck; overlay stays open
+
+    onWatchThis(winnerMovie);
   };
 
   const handleEliminate = () => {
     if (!winnerMovie) return;
+
     onRemove(winnerMovie);
+
     const remaining = movies.filter((m) => m.title !== winnerMovie.title);
+
     setWinnerMovie(null);
+
     setActiveIndex(null);
+
     setFlippedCards(new Set());
 
     if (remaining.length === 1) {
-      // Auto-win: immediately confirm the last card as winner.
       const autoWinner = remaining[0];
+
       setWinnerMovie(autoWinner);
+
       setWatchAccepted(true);
+
       onWatchThis(autoWinner);
     } else if (remaining.length >= 2) {
-      setTimeout(() => runSpin(remaining), 300);
+      setTimeout(() => runSpin(remaining), 350);
     }
   };
 
-  // ── Derived layout ─────────────────────────────────────────────────────────
   const cardCount = Math.max(1, movies.length);
+
   const deckWidth = CARD_WIDTH + CARD_OFFSET * (cardCount - 1);
 
   const renderFan = () =>
@@ -334,7 +393,7 @@ const MovieDeck: React.FC<Props> = ({
         isWinner={winnerMovie?.title === movie.title && !isShuffling}
         isShuffling={isShuffling}
         isFlipped={flippedCards.has(i)}
-        nudge={hoveredIndex === null ? 0 : (i - hoveredIndex) * 45}
+        nudge={hoveredIndex === null ? 0 : (i - hoveredIndex) * 50}
         onHoverStart={() => setHoveredIndex(i)}
         onHoverEnd={() => setHoveredIndex(null)}
         onClick={() =>
@@ -344,10 +403,9 @@ const MovieDeck: React.FC<Props> = ({
       />
     ));
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-8">
-      {/* In-page view — hidden while overlay is open */}
+    <div className="space-y-10">
+      {/* NORMAL DECK */}
       {!shuffleActive && (
         <>
           {movies.length > 0 ? (
@@ -355,37 +413,46 @@ const MovieDeck: React.FC<Props> = ({
               className="relative mx-auto"
               style={{
                 width: `${deckWidth}px`,
-                height: `${CARD_HEIGHT + 80}px`,
+                height: `${CARD_HEIGHT + 110}px`,
               }}
             >
               {renderFan()}
             </div>
           ) : (
-            <div className="text-center py-8 space-y-1">
-              <p className="text-muted text-sm">No movies on the deck yet.</p>
-              <p className="text-muted text-xs">
-                Pick some movies to get started!
+            <div className="rounded-3xl border border-border bg-surface/50 py-12 text-center backdrop-blur-xl shadow-card">
+              <p className="text-base font-medium text-text">
+                Your deck is empty
+              </p>
+
+              <p className="mt-2 text-sm text-muted">
+                Add some movies to start the showdown
               </p>
             </div>
           )}
 
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex items-center justify-center gap-4">
             <motion.button
               onClick={handleShuffle}
               disabled={movies.length < 2}
-              whileHover={movies.length >= 2 ? { scale: 1.04 } : {}}
-              whileTap={movies.length >= 2 ? { scale: 0.96 } : {}}
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              whileHover={movies.length >= 2 ? { scale: 1.03 } : {}}
+              whileTap={movies.length >= 2 ? { scale: 0.97 } : {}}
+              transition={{
+                type: 'spring',
+                stiffness: 320,
+                damping: 22,
+              }}
               className={`
-                px-8 py-3 rounded-full text-sm font-medium transition-colors duration-150
+                rounded-full px-8 py-3.5
+                text-sm font-semibold tracking-wide
+                transition-all duration-300
                 ${
                   movies.length < 2
-                    ? 'bg-surface text-muted cursor-not-allowed border border-border'
-                    : 'bg-accent text-bg cursor-pointer shadow-lg shadow-accent/25'
+                    ? 'cursor-not-allowed border border-border bg-surface text-muted'
+                    : 'bg-accent text-white shadow-glow hover:brightness-110'
                 }
               `}
             >
-              Shuffle
+              Shuffle Deck
             </motion.button>
 
             {movies.length > 0 && (
@@ -394,22 +461,27 @@ const MovieDeck: React.FC<Props> = ({
                   onClear();
                   setFlippedCards(new Set());
                 }}
-                className="px-4 py-3 rounded-full text-xs border border-border text-muted hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
+                className="
+                  rounded-full border border-border
+                  px-5 py-3 text-xs font-medium text-muted
+                  transition-all duration-200
+                  hover:border-accent/40 hover:bg-white/[0.03] hover:text-text
+                "
               >
-                Clear all
+                Clear Deck
               </button>
             )}
           </div>
 
           {movies.length === 1 && (
-            <p className="text-center text-muted text-xs">
+            <p className="text-center text-xs text-muted">
               Add at least one more movie to shuffle.
             </p>
           )}
         </>
       )}
 
-      {/* Fullscreen overlay */}
+      {/* OVERLAY */}
       <AnimatePresence>
         {shuffleActive && (
           <motion.div
@@ -417,57 +489,98 @@ const MovieDeck: React.FC<Props> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center"
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden"
           >
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
+            {/* Background */}
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-2xl" />
+
+            {/* Glow */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,170,60,0.10),transparent_60%)]" />
 
             {/* Close */}
             <button
               onClick={onClose}
-              className="absolute top-6 right-6 z-10 w-10 h-10 rounded-full bg-surface border border-border text-muted hover:text-text hover:border-accent transition-all duration-150 flex items-center justify-center text-sm cursor-pointer"
+              className="
+                absolute right-6 top-6 z-20
+                flex h-11 w-11 items-center justify-center
+                rounded-full border border-white/10
+                bg-white/5 text-sm text-muted
+                backdrop-blur-xl
+                transition-all duration-200
+                hover:border-accent/40 hover:text-white
+              "
             >
               ✕
             </button>
 
-            {/* ── Accepted / winner-reveal state ── */}
             <AnimatePresence mode="wait">
               {watchAccepted && winnerMovie ? (
                 <motion.div
-                  key="reveal"
-                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  key="winner"
+                  initial={{ opacity: 0, scale: 0.92, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.35, ease: [0.34, 1.2, 0.64, 1] }}
-                  className="relative z-10 flex flex-col items-center gap-6"
+                  transition={{
+                    duration: 0.35,
+                    ease: [0.34, 1.2, 0.64, 1],
+                  }}
+                  className="relative z-10 flex flex-col items-center"
                 >
-                  <p className="text-accent text-xs uppercase tracking-widest">
-                    Tonight you're watching
-                  </p>
-                  <div className="w-[320px] max-w-[85vw]">
+                  <div className="mb-6 flex items-center gap-4">
+                    <div className="h-px w-12 bg-white/10" />
+
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.4em] text-accent">
+                      Tonight You’re Watching
+                    </p>
+
+                    <div className="h-px w-12 bg-white/10" />
+                  </div>
+
+                  <div className="w-[360px] max-w-[88vw]">
                     <MovieCard movie={winnerMovie} />
                   </div>
+
                   <button
                     onClick={onClose}
-                    className="mt-2 px-8 py-2.5 rounded-full text-sm border border-border text-muted hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
+                    className="
+                      mt-8 rounded-full border border-white/10
+                      bg-white/[0.03] px-8 py-3
+                      text-sm font-medium text-muted
+                      transition-all duration-200
+                      hover:border-accent/40 hover:text-white
+                    "
                   >
                     Done
                   </button>
                 </motion.div>
               ) : (
-                /* ── Shuffle / selection state ── */
                 <motion.div
                   key="shuffle"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="relative z-10 flex flex-col items-center gap-16"
+                  className="relative z-10 flex flex-col items-center gap-20"
                 >
-                  {/* Scaled deck fan */}
+                  {/* Title */}
+                  <div className="text-center">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.45em] text-accent">
+                      Movie Night Shuffle
+                    </p>
+
+                    <h2 className="mt-4 text-4xl font-semibold tracking-tight text-white">
+                      Let fate decide
+                    </h2>
+
+                    <p className="mt-3 text-sm text-muted">
+                      One movie survives.
+                    </p>
+                  </div>
+
+                  {/* Deck */}
                   <div
                     style={{
                       width: `${deckWidth * OVERLAY_SCALE}px`,
-                      height: `${(CARD_HEIGHT + 80) * OVERLAY_SCALE}px`,
+                      height: `${(CARD_HEIGHT + 120) * OVERLAY_SCALE}px`,
                       position: 'relative',
                     }}
                   >
@@ -476,7 +589,7 @@ const MovieDeck: React.FC<Props> = ({
                         className="relative"
                         style={{
                           width: `${deckWidth}px`,
-                          height: `${CARD_HEIGHT + 80}px`,
+                          height: `${CARD_HEIGHT + 120}px`,
                           transform: `scale(${OVERLAY_SCALE})`,
                           transformOrigin: 'center center',
                         }}
@@ -486,36 +599,54 @@ const MovieDeck: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  {/* Winner action buttons */}
-                  <div className="min-h-[72px] flex items-center justify-center">
+                  {/* Winner actions */}
+                  <div className="min-h-[90px] flex items-center justify-center">
                     <AnimatePresence>
                       {winnerMovie && !isShuffling && (
                         <motion.div
-                          initial={{ opacity: 0, y: 8 }}
+                          initial={{ opacity: 0, y: 12 }}
                           animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 8 }}
-                          transition={{ duration: 0.2 }}
-                          className="flex flex-col items-center gap-3"
+                          exit={{ opacity: 0, y: 12 }}
+                          transition={{ duration: 0.22 }}
+                          className="flex flex-col items-center gap-5"
                         >
-                          <p className="text-text text-sm">
-                            🎬{' '}
-                            <span className="font-medium">
+                          <div className="text-center">
+                            <p className="text-lg font-semibold text-white">
                               {winnerMovie.title}
-                            </span>
-                            {winnerMovie.year ? ` (${winnerMovie.year})` : ''}
-                          </p>
-                          <div className="flex gap-3">
+                            </p>
+
+                            {winnerMovie.year && (
+                              <p className="mt-1 text-sm text-muted">
+                                {winnerMovie.year}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap items-center justify-center gap-3">
                             <button
                               onClick={handleWatchThis}
-                              className="px-5 py-2 rounded-full text-sm bg-accent text-bg font-medium cursor-pointer hover:bg-accent-hover transition-colors duration-150"
+                              className="
+                                rounded-full bg-accent
+                                px-6 py-3 text-sm font-semibold text-white
+                                shadow-glow
+                                transition-all duration-200
+                                hover:brightness-110
+                              "
                             >
-                              Watch this!
+                              Watch This
                             </button>
+
                             <button
                               onClick={handleEliminate}
-                              className="px-5 py-2 rounded-full text-sm border border-border text-muted hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
+                              className="
+                                rounded-full border border-white/10
+                                bg-white/[0.03]
+                                px-6 py-3 text-sm font-medium text-muted
+                                transition-all duration-200
+                                hover:border-accent/40 hover:text-white
+                              "
                             >
-                              Eliminate & Shuffle again
+                              Eliminate & Shuffle Again
                             </button>
                           </div>
                         </motion.div>
@@ -529,7 +660,7 @@ const MovieDeck: React.FC<Props> = ({
         )}
       </AnimatePresence>
 
-      {/* Card detail modal */}
+      {/* Modal */}
       {modalMovie && (
         <MovieModal movie={modalMovie} onClose={() => setModalMovie(null)} />
       )}

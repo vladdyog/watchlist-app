@@ -13,7 +13,7 @@ type Props = {
 };
 
 const ENRICHING_MESSAGES = [
-  "Sit back and relax — we're gathering info on your watchlist...",
+  "Sit back and relax - we're gathering info on your watchlist...",
   'Good taste detected! Fetching all the details...',
   "Hold tight! We're looking up your movies...",
   'Consulting the cinema archives...',
@@ -31,6 +31,7 @@ const CSVUpload: React.FC<Props> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   const processFile = async (file: File) => {
@@ -38,31 +39,42 @@ const CSVUpload: React.FC<Props> = ({
       onError('Please upload a .csv file.');
       return;
     }
+
     setFileName(file.name);
     setIsParsing(true);
+
     const result = await parseCSV(file);
+
     setIsParsing(false);
+
     if (!result.success) {
       onError(result.error);
       return;
     }
+
     const movies = normalizeMovies(result.rows);
+
     if (movies.length === 0) {
       onError('No valid movies found in the CSV file.');
       return;
     }
+
     onMoviesLoaded(movies);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (file) processFile(file);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+
     setIsDragging(false);
+
     const file = e.dataTransfer.files?.[0];
+
     if (file) processFile(file);
   };
 
@@ -70,69 +82,83 @@ const CSVUpload: React.FC<Props> = ({
     e.preventDefault();
     setIsDragging(true);
   };
+
   const handleDragLeave = (e: React.DragEvent) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node))
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setIsDragging(false);
+    }
   };
 
-  // ── Shared outer wrapper keeps all states the same width ─────────────────
   const renderContent = () => {
-    // Parsing
     if (isParsing) {
       return (
-        <div className="bg-surface border border-border rounded-xl p-5 flex items-center gap-3">
+        <div className="bg-surface/80 border border-border rounded-3xl p-6 flex items-center gap-4 backdrop-blur-sm">
           <svg
-            className="animate-spin w-4 h-4 text-accent flex-shrink-0"
+            className="animate-spin w-5 h-5 text-accent flex-shrink-0"
             viewBox="0 0 24 24"
             fill="none"
           >
             <circle
-              className="opacity-25"
+              className="opacity-20"
               cx="12"
               cy="12"
               r="10"
               stroke="currentColor"
               strokeWidth="4"
             />
+
             <path
-              className="opacity-75"
+              className="opacity-100"
               fill="currentColor"
               d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
             />
           </svg>
+
           <div>
-            <p className="text-text text-sm">Parsing {fileName}...</p>
-            <p className="text-muted text-xs">Reading your watchlist</p>
+            <p className="text-white text-sm font-semibold">
+              Parsing {fileName}...
+            </p>
+
+            <p className="text-muted text-sm mt-1">Reading your watchlist</p>
           </div>
         </div>
       );
     }
 
-    // Enriching
     if (isEnriching && progress) {
       const pct = Math.round((progress.completed / progress.total) * 100);
+
       const message =
         ENRICHING_MESSAGES[progress.total % ENRICHING_MESSAGES.length];
+
       return (
-        <div className="bg-surface border border-border rounded-xl p-5 space-y-3">
-          <div className="flex justify-between items-start gap-4 text-sm">
-            <span className="text-text">{message}</span>
-            <span className="text-accent font-medium whitespace-nowrap">
-              {progress.completed} / {progress.total}
-            </span>
+        <div className="bg-surface/80 border border-border rounded-3xl p-6 space-y-5 backdrop-blur-sm">
+          <div className="flex justify-between items-start gap-4">
+            <div>
+              <p className="text-white text-sm font-semibold leading-relaxed">
+                {message}
+              </p>
+
+              <p className="text-muted text-sm mt-2">
+                {progress.completed} / {progress.total} movies collected
+              </p>
+            </div>
+
+            <div className="text-accent font-bold text-lg whitespace-nowrap">
+              {pct}%
+            </div>
           </div>
-          <div className="h-0.5 bg-border rounded-full overflow-hidden">
+
+          <div className="h-2 bg-surface-elevated rounded-full overflow-hidden">
             <div
-              className="h-full bg-accent rounded-full transition-all duration-200"
+              className="h-full bg-accent rounded-full transition-all duration-300"
               style={{ width: `${pct}%` }}
             />
           </div>
-          <p className="text-muted text-xs">{pct}% complete</p>
         </div>
       );
     }
 
-    // Loaded (compact)
     if (movieCount > 0) {
       return (
         <div
@@ -140,24 +166,49 @@ const CSVUpload: React.FC<Props> = ({
           onDrop={handleDrop}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
-          className="flex items-center justify-between bg-surface border border-border rounded-xl px-5 py-3.5 cursor-pointer hover:border-accent transition-colors duration-150 group"
+          className="
+            flex flex-col sm:flex-row sm:items-center sm:justify-between
+            gap-5
+            bg-surface/80
+            border border-border
+            rounded-3xl
+            px-6 py-5
+            cursor-pointer
+            hover:border-accent/40
+            transition-all duration-200
+            backdrop-blur-sm
+            group
+          "
         >
-          <div className="flex items-center gap-3">
-            <span className="text-accent text-lg">✓</span>
+          <div className="flex items-center gap-4">
+            <div
+              className="
+              w-11 h-11 rounded-2xl
+              bg-accent/10
+              flex items-center justify-center
+              text-accent text-lg
+            "
+            >
+              ✓
+            </div>
+
             <div>
-              <p className="text-text text-sm font-medium">
+              <p className="text-white text-sm font-semibold">
                 {fileName ?? 'Watchlist loaded'}
               </p>
-              <p className="text-muted text-xs">
+
+              <p className="text-muted text-sm mt-1">
                 {movieCount} movies
                 {enrichmentTime != null &&
                   ` · enriched in ${enrichmentTime.toFixed(1)}s`}
               </p>
             </div>
           </div>
-          <span className="text-muted text-xs group-hover:text-accent transition-colors duration-150 whitespace-nowrap">
+
+          <p className="text-muted text-sm group-hover:text-white transition-colors duration-200">
             Click to replace
-          </span>
+          </p>
+
           <input
             ref={inputRef}
             type="file"
@@ -169,7 +220,6 @@ const CSVUpload: React.FC<Props> = ({
       );
     }
 
-    // Empty (dropzone)
     return (
       <div
         onClick={() => inputRef.current?.click()}
@@ -177,27 +227,49 @@ const CSVUpload: React.FC<Props> = ({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         className={`
-          border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200
+          border-2 border-dashed rounded-[2rem]
+          p-12 sm:p-16
+          text-center
+          cursor-pointer
+          transition-all duration-300
+          backdrop-blur-sm
           ${
             isDragging
-              ? 'border-accent bg-accent/5'
-              : 'border-border bg-surface hover:border-accent/50'
+              ? `
+                border-accent
+                bg-accent/10
+                scale-[1.01]
+              `
+              : `
+                border-border
+                bg-surface/50
+                hover:border-accent/40
+                hover:bg-surface/70
+              `
           }
         `}
       >
         <div
-          className={`text-3xl mb-3 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-40'}`}
+          className={`
+            text-5xl mb-5 transition-all duration-300
+            ${isDragging ? 'scale-110' : 'opacity-70'}
+          `}
         >
           {isDragging ? '📂' : '📁'}
         </div>
-        <p className="text-text text-sm mb-1">
+
+        <p className="text-white text-lg font-semibold">
           {isDragging
             ? 'Drop your CSV here'
             : 'Drop your CSV here or click to browse'}
         </p>
-        <p className="text-muted text-xs">
+
+        <p className="text-muted text-sm mt-3 leading-relaxed">
           Supports IMDb and Letterboxd exports
+          <br />
+          or click to browse files
         </p>
+
         <input
           ref={inputRef}
           type="file"
