@@ -22,6 +22,8 @@ const MoviePicker: React.FC<Props> = ({
 }) => {
   const [showModal, setShowModal] = useState(false);
 
+  const [recentDeckAdd, setRecentDeckAdd] = useState<Movie | null>(null);
+
   const pickRandom = () => {
     if (movies.length === 0) return;
 
@@ -29,6 +31,8 @@ const MoviePicker: React.FC<Props> = ({
 
     if (!deckEnabled) {
       setShowModal(true);
+    } else {
+      setRecentDeckAdd(movie);
     }
 
     onMoviePicked?.(movie);
@@ -43,51 +47,55 @@ const MoviePicker: React.FC<Props> = ({
       : 'Pick a movie';
 
   return (
-    <div className="flex flex-col items-center gap-8 py-6">
+    <div className="flex flex-col items-center gap-8">
       {isEmpty ? (
-        <div className="bg-surface/70 border border-border rounded-2xl px-8 py-10 text-center max-w-md w-full">
-          <p className="text-white text-lg font-semibold">
+        <div className="flex flex-col items-center gap-2 py-4">
+          <p className="text-text text-base">
             No movies match your filters
           </p>
 
-          <p className="text-muted text-sm mt-2 leading-relaxed">
-            Try adjusting your filters or resetting them to see more results.
+          <p className="text-muted text-sm">
+            Try adjusting or resetting the filters above
           </p>
         </div>
       ) : (
         !shuffleActive && (
-          <motion.button
-            onClick={pickRandom}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
-            className={`
-              relative overflow-hidden
-              px-10 py-4 rounded-2xl
-              font-semibold text-sm tracking-wide
-              transition-all duration-300
-              cursor-pointer
-              shadow-[0_10px_30px_rgba(0,0,0,0.3)]
-              ${
-                deckEnabled
-                  ? `
-                    bg-surface-elevated
-                    border border-border
-                    text-white
-                    hover:border-accent/40
-                    hover:bg-surface
-                  `
-                  : `
-                    bg-accent
-                    text-bg
-                    hover:bg-accent-hover
-                    shadow-[0_10px_35px_rgba(255,184,77,0.25)]
-                  `
-              }
-            `}
-          >
-            {label}
-          </motion.button>
+          <>
+            <motion.button
+              onClick={pickRandom}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.985 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+              className={`
+                min-w-[240px]
+                px-10 py-4 rounded-2xl
+                text-base font-semibold tracking-tight
+                transition-all duration-200
+                shadow-xl
+                cursor-pointer
+                ${
+                  deckEnabled
+                    ? 'bg-surface border border-border text-text hover:border-accent/50 hover:bg-white/[0.04]'
+                    : 'bg-accent text-black shadow-accent/20 hover:bg-accent-hover'
+                }
+              `}
+            >
+              {label}
+            </motion.button>
+
+            <AnimatePresence mode="wait">
+              {deckEnabled && recentDeckAdd && (
+                <motion.div
+                  key={recentDeckAdd.title}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="text-center"
+                >
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
         )
       )}
 
@@ -96,20 +104,17 @@ const MoviePicker: React.FC<Props> = ({
       )}
 
       {!deckEnabled && (
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {lastPick && !showModal && (
             <motion.div
               key={lastPick.title}
               className="w-full max-w-md"
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 12 }}
-              transition={{
-                duration: 0.25,
-                ease: [0.22, 1, 0.36, 1],
-              }}
+              exit={{ opacity: 0, y: 8 }}
+              transition={{ duration: 0.2 }}
             >
-              <div className="text-center mb-5">
+              <div className="text-center mb-6">
                 <p className="text-accent text-sm font-semibold tracking-wide">
                   Tonight&apos;s Pick
                 </p>

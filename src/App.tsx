@@ -124,19 +124,22 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-bg flex flex-col">
       <Analytics />
 
-      <header className="sticky top-0 z-30 border-b border-border/60 bg-bg/85 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 py-8 text-center">
-          <h1 className="font-display text-5xl sm:text-6xl font-bold tracking-tight text-white">
+      {/* Header */}
+      <header className="border-b border-border/60">
+        <div className="max-w-5xl mx-auto px-6 py-6 text-center">
+          <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight text-white">
             CueMovie
           </h1>
 
-          <p className="text-muted text-base sm:text-lg mt-3 font-medium">
+          <p className="text-muted text-sm sm:text-base mt-2">
             From your watchlist to tonight&apos;s pick.
           </p>
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-6xl mx-auto px-6 py-10 sm:py-14 space-y-14">
+      {/* Main */}
+      <main className="flex-1 w-full max-w-5xl mx-auto px-6 py-10 sm:py-14 space-y-14">
+        {/* Watchlist */}
         <Section title="Watchlist">
           <CSVUpload
             movieCount={movies.length}
@@ -152,8 +155,10 @@ const App: React.FC = () => {
           )}
         </Section>
 
+        {/* Filters + Picker */}
         {!isEnriching && movies.length > 0 && (
           <>
+            {/* Filters */}
             <Section title="Filters">
               <MovieFilters
                 movies={movies}
@@ -166,30 +171,35 @@ const App: React.FC = () => {
               </p>
             </Section>
 
-            <section>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            {/* Picker */}
+            <Section title="Pick a Movie">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 mb-10">
                 <div>
-                  <h2 className="font-display text-2xl font-bold tracking-tight text-white">
-                    Pick a Movie
-                  </h2>
-
-                  <p className="text-muted text-sm mt-1">
+                  <p className="text-muted text-sm">
                     Let the app decide your next watch.
                   </p>
                 </div>
 
-                <label className="flex items-center gap-3 text-sm text-muted cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={deckEnabled}
-                    onChange={(e) => setDeckEnabled(e.target.checked)}
-                    className="accent-accent w-4 h-4"
-                  />
+                {/* Deck toggle */}
+                <label className="flex items-center gap-3 text-sm text-muted cursor-pointer select-none sm:mt-6">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={deckEnabled}
+                      onChange={(e) => setDeckEnabled(e.target.checked)}
+                      className="peer sr-only"
+                    />
+
+                    <div className="w-12 h-7 rounded-full bg-surface border border-border transition-all duration-200 peer-checked:bg-accent" />
+
+                    <div className="absolute top-1 left-1 w-5 h-5 rounded-full bg-white transition-transform duration-200 peer-checked:translate-x-5" />
+                  </div>
 
                   <span className="font-medium">Deck mode</span>
                 </label>
               </div>
 
+              {/* Picker */}
               <MoviePicker
                 movies={filteredMovies}
                 onMoviePicked={handleMoviePicked}
@@ -198,6 +208,7 @@ const App: React.FC = () => {
                 lastPick={lastPick}
               />
 
+              {/* Deck */}
               {deckEnabled && (
                 <div className="mt-6">
                   <MovieDeck
@@ -214,6 +225,7 @@ const App: React.FC = () => {
                 </div>
               )}
 
+              {/* Last Winner */}
               {deckEnabled && lastPick && !shuffleActive && (
                 <div className="mt-14">
                   <div className="text-center mb-6">
@@ -235,19 +247,21 @@ const App: React.FC = () => {
                 </div>
               )}
 
+              {/* Winner Modal */}
               {showDeckWinnerModal && lastPick && (
                 <MovieModal
                   movie={lastPick}
                   onClose={() => setShowDeckWinnerModal(false)}
                 />
               )}
-            </section>
+            </Section>
           </>
         )}
       </main>
 
+      {/* Footer */}
       <footer className="border-t border-border/60 mt-16">
-        <div className="max-w-6xl mx-auto px-6 py-8 text-center">
+        <div className="max-w-5xl mx-auto px-6 py-8 text-center">
           <p className="text-sm text-muted">
             CueMovie · v{APP_VERSION} · © 2026 {AUTHOR}
           </p>

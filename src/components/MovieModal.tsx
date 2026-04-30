@@ -2,7 +2,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect } from 'react';
 
 import type { Movie } from '../types';
-import MovieCard from './MovieCard';
 
 type Props = {
   movie: Movie;
@@ -29,54 +28,88 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
           backdropFilter: 'blur(0px)',
         }}
         animate={{
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(0,0,0,0.82)',
+          backdropFilter: 'blur(8px)',
         }}
         exit={{
           backgroundColor: 'rgba(0,0,0,0)',
           backdropFilter: 'blur(0px)',
         }}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: 0.2 }}
         onClick={onClose}
       >
         <motion.div
-          className="relative w-full max-w-md max-h-[90svh] flex flex-col"
-          initial={{ opacity: 0, scale: 0.9, y: 40 }}
+          className="relative w-full max-w-md"
+          initial={{ opacity: 0, scale: 0.96, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 40 }}
-          transition={{
-            duration: 0.35,
-            ease: [0.22, 1, 0.36, 1],
-          }}
+          exit={{ opacity: 0, scale: 0.96, y: 20 }}
+          transition={{ duration: 0.24 }}
           onClick={(e) => e.stopPropagation()}
         >
+          <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#171717] shadow-2xl shadow-black/50">
+            {/* Poster */}
+            <div className="aspect-[2/3] bg-surface overflow-hidden">
+              {movie.poster ? (
+                <img
+                  src={movie.poster}
+                  alt={movie.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-5xl">
+                  🎬
+                </div>
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <div className="mb-4">
+                <h2 className="font-display text-3xl leading-tight">
+                  {movie.title}
+                </h2>
+
+                <p className="text-muted text-sm mt-2">
+                  {[
+                    movie.year,
+                    movie.runtime && `${movie.runtime} min`,
+                    movie.rating && `★ ${movie.rating.toFixed(1)}`,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+              </div>
+
+              {movie.genres && movie.genres.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {movie.genres.map((genre) => (
+                    <span
+                      key={genre}
+                      className="text-xs px-3 py-1 rounded-full bg-white/[0.04] border border-white/6 text-muted"
+                    >
+                      {genre}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {movie.overview && (
+                <div className="max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                  <p className="text-sm leading-7 text-text/80">
+                    {movie.overview}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Close */}
           <button
             onClick={onClose}
-            className="
-              absolute -top-4 -right-4
-              z-10
-              w-10 h-10
-              rounded-full
-              bg-surface-elevated/95
-              backdrop-blur-md
-              border border-border
-              text-muted
-              hover:text-white
-              hover:border-accent/50
-              transition-all duration-200
-              flex items-center justify-center
-              text-sm
-              shadow-lg
-              cursor-pointer
-            "
+            className="absolute -top-3 -right-3 z-10 w-10 h-10 rounded-full bg-[#1d1d1d] border border-white/10 text-muted hover:text-text hover:border-accent/50 transition-all duration-150 flex items-center justify-center cursor-pointer"
           >
             ✕
           </button>
-
-          <div className="overflow-y-auto rounded-2xl">
-            <MovieCard movie={movie} />
-          </div>
-
           <p className="text-center text-muted text-sm mt-5">
             Press{' '}
             <kbd className="px-2 py-1 bg-surface-elevated border border-border rounded-md text-xs">

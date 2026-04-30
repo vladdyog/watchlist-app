@@ -448,7 +448,7 @@ const MovieDeck: React.FC<Props> = ({
                 ${
                   movies.length < 2
                     ? 'cursor-not-allowed border border-border bg-surface text-muted'
-                    : 'bg-accent text-white shadow-glow hover:brightness-110'
+                    : 'bg-accent text-black shadow-glow hover:brightness-110 cursor-pointer'
                 }
               `}
             >
@@ -464,7 +464,7 @@ const MovieDeck: React.FC<Props> = ({
                 className="
                   rounded-full border border-border
                   px-5 py-3 text-xs font-medium text-muted
-                  transition-all duration-200
+                  transition-all duration-200 cursor-pointer
                   hover:border-accent/40 hover:bg-white/[0.03] hover:text-text
                 "
               >
@@ -627,8 +627,8 @@ const MovieDeck: React.FC<Props> = ({
                               onClick={handleWatchThis}
                               className="
                                 rounded-full bg-accent
-                                px-6 py-3 text-sm font-semibold text-white
-                                shadow-glow
+                                px-6 py-3 text-sm font-semibold text-black
+                                shadow-glow cursor-pointer
                                 transition-all duration-200
                                 hover:brightness-110
                               "
@@ -640,7 +640,7 @@ const MovieDeck: React.FC<Props> = ({
                               onClick={handleEliminate}
                               className="
                                 rounded-full border border-white/10
-                                bg-white/[0.03]
+                                bg-white/[0.03] cursor-pointer
                                 px-6 py-3 text-sm font-medium text-muted
                                 transition-all duration-200
                                 hover:border-accent/40 hover:text-white
