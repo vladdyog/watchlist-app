@@ -510,7 +510,7 @@ const MovieDeck: React.FC<Props> = ({
                   fontWeight: 500,
                 }}
               >
-                Pick some films above to add them!
+                Click the button above to add some!
               </p>
             </div>
           )}
