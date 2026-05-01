@@ -12,13 +12,166 @@ type Props = {
   onError: (error: string) => void;
 };
 
-const MESSAGES = [
-  'Consulting the cinema archives…',
-  'Fetching film details from TMDb…',
-  'Cross-referencing your watchlist…',
-  'Loading posters, ratings, runtimes…',
-  'Almost there — just a few more…',
+const ENRICHING_MESSAGES = [
+  "Sit back and relax — we're gathering info on your watchlist...",
+  'Good taste detected! Fetching all the details...',
+  "Hold tight! We're looking up your movies...",
+  'Consulting the cinema archives...',
+  'Great watchlist! Give us a moment to look everything up...',
 ];
+
+const EXPORT_GUIDES = [
+  {
+    source: 'IMDb',
+    steps: [
+      'Sign in to IMDb and open your profile menu',
+      'Select `Your Watchlist`',
+      'Click the `Export this list` button near the top-right corner',
+      'IMDb will generate a CSV file for download',
+      'If prompted, click `Open exports page` and download the CSV from there',
+      'Upload the downloaded CSV file here',
+    ],
+  },
+  {
+    source: 'Letterboxd',
+    steps: [
+      'Sign in to Letterboxd and open your profile',
+      'Go to your `Watchlist`',
+      'Click the `Export Watchlist` button on the right side of the page',
+      'Choose where to save the CSV file and click `Save`',
+      'Upload the downloaded CSV file here',
+    ],
+  },
+];
+
+const ExportGuide: React.FC = () => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div style={{ marginTop: '12px' }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          margin: '0 auto',
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--color-muted)',
+          fontSize: '0.8rem',
+          fontWeight: 500,
+          fontFamily: 'var(--font-body)',
+          cursor: 'pointer',
+          transition: 'color 0.15s',
+        }}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.color = 'var(--color-text-secondary)')
+        }
+        onMouseLeave={(e) =>
+          (e.currentTarget.style.color = 'var(--color-muted)')
+        }
+      >
+        <span
+          style={{
+            display: 'inline-block',
+            transition: 'transform 0.2s',
+            transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+            fontSize: '0.6rem',
+          }}
+        >
+          ▶
+        </span>
+        How do I get my watchlist file?
+      </button>
+
+      {open && (
+        <div style={{ marginTop: '14px' }}>
+          <p
+            style={{
+              fontSize: '0.8rem',
+              color: 'var(--color-muted)',
+              textAlign: 'center',
+              marginBottom: '12px',
+              fontWeight: 500,
+            }}
+          >
+            Export your watchlist as a CSV from IMDb or Letterboxd, then upload
+            it here.
+          </p>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '12px',
+            }}
+          >
+            {EXPORT_GUIDES.map(({ source, steps }) => (
+              <div
+                key={source}
+                style={{
+                  background: 'var(--color-surface-2)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: '10px',
+                  padding: '14px 16px',
+                  textAlign: 'left',
+                }}
+              >
+                <p
+                  style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-accent)',
+                    marginBottom: '10px',
+                  }}
+                >
+                  {source}
+                </p>
+                <ol
+                  style={{
+                    listStyle: 'none',
+                    padding: 0,
+                    margin: 0,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '6px',
+                  }}
+                >
+                  {steps.map((step, i) => (
+                    <li
+                      key={i}
+                      style={{
+                        display: 'flex',
+                        gap: '8px',
+                        fontSize: '0.78rem',
+                        color: 'var(--color-text-secondary)',
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: 'var(--color-muted)',
+                          flexShrink: 0,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {i + 1}.
+                      </span>
+                      {step}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const CSVUpload: React.FC<Props> = ({
   movieCount,
@@ -138,7 +291,7 @@ const CSVUpload: React.FC<Props> = ({
   // Enriching
   if (isEnriching && progress) {
     const pct = Math.round((progress.completed / progress.total) * 100);
-    const msg = MESSAGES[progress.total % MESSAGES.length];
+    const msg = ENRICHING_MESSAGES[progress.total % ENRICHING_MESSAGES.length];
     return (
       <div style={{ ...cardStyle, padding: '20px' }}>
         <div
@@ -203,7 +356,7 @@ const CSVUpload: React.FC<Props> = ({
     );
   }
 
-  // Loaded — always "Watchlist loaded", no filename
+  // Loaded
   if (movieCount > 0) {
     return (
       <div
@@ -218,7 +371,6 @@ const CSVUpload: React.FC<Props> = ({
           alignItems: 'center',
           justifyContent: 'space-between',
           cursor: 'pointer',
-          transition: 'border-color 0.15s',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -264,7 +416,6 @@ const CSVUpload: React.FC<Props> = ({
             </p>
           </div>
         </div>
-
         <span
           style={{
             fontSize: '0.8rem',
@@ -273,9 +424,8 @@ const CSVUpload: React.FC<Props> = ({
             flexShrink: 0,
           }}
         >
-          Click to replace
+          Replace →
         </span>
-
         <input
           ref={inputRef}
           type="file"
@@ -287,84 +437,86 @@ const CSVUpload: React.FC<Props> = ({
     );
   }
 
-  // Empty dropzone
+  // Empty dropzone + export guide
   return (
-    <div
-      onClick={() => inputRef.current?.click()}
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      style={{
-        borderRadius: '12px',
-        border: `2px dashed ${isDragging ? 'var(--color-accent)' : 'var(--color-border)'}`,
-        background: isDragging
-          ? 'rgba(255,128,0,0.04)'
-          : 'var(--color-surface)',
-        padding: '48px 24px',
-        textAlign: 'center',
-        cursor: 'pointer',
-        transition: 'border-color 0.2s ease, background-color 0.2s ease',
-      }}
-      onMouseEnter={(e) => {
-        if (!isDragging)
-          e.currentTarget.style.borderColor = 'var(--color-border-light)';
-      }}
-      onMouseLeave={(e) => {
-        if (!isDragging)
-          e.currentTarget.style.borderColor = 'var(--color-border)';
-      }}
-    >
+    <>
       <div
+        onClick={() => inputRef.current?.click()}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         style={{
-          fontSize: '2.5rem',
-          marginBottom: '16px',
-          filter: isDragging ? 'none' : 'grayscale(1)',
-          opacity: isDragging ? 1 : 0.5,
-          transform: isDragging ? 'scale(1.1)' : 'scale(1)',
-          transition: 'all 0.2s',
+          borderRadius: '12px',
+          border: `2px dashed ${isDragging ? 'var(--color-accent)' : 'var(--color-border)'}`,
+          background: isDragging
+            ? 'rgba(255,128,0,0.04)'
+            : 'var(--color-surface)',
+          padding: '48px 24px',
+          textAlign: 'center',
+          cursor: 'pointer',
+          transition: 'border-color 0.2s ease, background-color 0.2s ease',
+        }}
+        onMouseEnter={(e) => {
+          if (!isDragging)
+            e.currentTarget.style.borderColor = 'var(--color-border-light)';
+        }}
+        onMouseLeave={(e) => {
+          if (!isDragging)
+            e.currentTarget.style.borderColor = 'var(--color-border)';
         }}
       >
-        {isDragging ? '📂' : '📁'}
+        <div
+          style={{
+            fontSize: '2.5rem',
+            marginBottom: '16px',
+            filter: isDragging ? 'none' : 'grayscale(1)',
+            opacity: isDragging ? 1 : 0.5,
+            transform: isDragging ? 'scale(1.1)' : 'scale(1)',
+            transition: 'all 0.2s',
+          }}
+        >
+          {isDragging ? '📂' : '📁'}
+        </div>
+        <p
+          style={{
+            fontSize: '1rem',
+            fontWeight: 700,
+            color: 'var(--color-text)',
+            marginBottom: '6px',
+          }}
+        >
+          {isDragging ? 'Drop your CSV here' : 'Drop your watchlist CSV here'}
+        </p>
+        <p
+          style={{
+            fontSize: '0.875rem',
+            color: 'var(--color-text-secondary)',
+            fontWeight: 500,
+          }}
+        >
+          or click to browse
+        </p>
+        <p
+          style={{
+            fontSize: '0.8rem',
+            color: 'var(--color-muted)',
+            marginTop: '8px',
+            fontWeight: 500,
+          }}
+        >
+          Supports IMDb and Letterboxd exports
+        </p>
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".csv"
+          onChange={handleFileChange}
+          className="hidden"
+        />
       </div>
-      <p
-        style={{
-          fontSize: '1rem',
-          fontWeight: 700,
-          color: 'var(--color-text)',
-          marginBottom: '6px',
-        }}
-      >
-        {isDragging
-          ? 'Drop your watchlist CSV here'
-          : 'Drop your watchlist CSV here'}
-      </p>
-      <p
-        style={{
-          fontSize: '0.875rem',
-          color: 'var(--color-text-secondary)',
-          fontWeight: 500,
-        }}
-      >
-        or click to browse
-      </p>
-      <p
-        style={{
-          fontSize: '0.8rem',
-          color: 'var(--color-muted)',
-          marginTop: '8px',
-          fontWeight: 500,
-        }}
-      >
-        Supports IMDb and Letterboxd exports
-      </p>
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".csv"
-        onChange={handleFileChange}
-        className="hidden"
-      />
-    </div>
+
+      <ExportGuide />
+    </>
   );
 };
 
