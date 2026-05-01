@@ -20,82 +20,6 @@ const ENRICHING_MESSAGES = [
   'Great watchlist! Give us a moment to look everything up...',
 ];
 
-const EXPORT_GUIDES = [
-  {
-    source: 'IMDb',
-    steps: [
-      'Sign in to IMDb and open your profile menu',
-      'Select `Your Watchlist`',
-      'Click the `Export this list` button near the top-right corner',
-      'IMDb will generate a CSV file for download',
-      'If prompted, click `Open exports page` and download the CSV from there',
-      'Upload the downloaded CSV file here',
-    ],
-  },
-  {
-    source: 'Letterboxd',
-    steps: [
-      'Sign in to Letterboxd and open your profile',
-      'Go to your `Watchlist`',
-      'Click the `Export Watchlist` button on the right side of the page',
-      'Choose where to save the CSV file and click `Save`',
-      'Upload the downloaded CSV file here',
-    ],
-  },
-];
-
-const ExportGuide: React.FC = () => {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="mt-3">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="text-muted text-xs hover:text-text transition-colors duration-150 flex items-center gap-1.5 mx-auto"
-      >
-        <span
-          className="inline-block transition-transform duration-200"
-          style={{ transform: open ? 'rotate(90deg)' : 'rotate(0deg)' }}
-        >
-          ▶
-        </span>
-        How do I get my watchlist file?
-      </button>
-
-      {open && (
-        <div className="mt-3">
-          <p className="text-muted text-xs text-center mb-3">
-            Export your watchlist as a CSV file from IMDb or Letterboxd, then
-            upload it here.
-          </p>
-
-          <div className="grid grid-cols-2 gap-3">
-            {EXPORT_GUIDES.map(({ source, steps }) => (
-              <div
-                key={source}
-                className="bg-surface border border-border rounded-lg px-4 py-3 text-left"
-              >
-                <p className="text-accent text-xs font-medium uppercase tracking-wider mb-2">
-                  {source}
-                </p>
-
-                <ol className="space-y-1">
-                  {steps.map((step, i) => (
-                    <li key={i} className="text-muted text-xs flex gap-2">
-                      <span className="text-border select-none">{i + 1}.</span>
-                      {step}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
 const CSVUpload: React.FC<Props> = ({
   movieCount,
   isEnriching,
@@ -151,6 +75,7 @@ const CSVUpload: React.FC<Props> = ({
       setIsDragging(false);
   };
 
+  // ── Shared outer wrapper keeps all states the same width ─────────────────
   const renderContent = () => {
     // Parsing
     if (isParsing) {
@@ -246,45 +171,41 @@ const CSVUpload: React.FC<Props> = ({
 
     // Empty (dropzone)
     return (
-      <>
+      <div
+        onClick={() => inputRef.current?.click()}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        className={`
+          border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200
+          ${
+            isDragging
+              ? 'border-accent bg-accent/5'
+              : 'border-border bg-surface hover:border-accent/50'
+          }
+        `}
+      >
         <div
-          onClick={() => inputRef.current?.click()}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          className={`
-            border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200
-            ${
-              isDragging
-                ? 'border-accent bg-accent/5'
-                : 'border-border bg-surface hover:border-accent/50'
-            }
-          `}
+          className={`text-3xl mb-3 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-40'}`}
         >
-          <div
-            className={`text-3xl mb-3 transition-opacity duration-200 ${isDragging ? 'opacity-100' : 'opacity-40'}`}
-          >
-            {isDragging ? '📂' : '📁'}
-          </div>
-          <p className="text-text text-sm mb-1">
-            {isDragging
-              ? 'Drop your watchlist file here'
-              : 'Drop your watchlist file here or click to browse'}
-          </p>
-          <p className="text-muted text-xs">
-            Supports IMDb and Letterboxd exports
-          </p>
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".csv"
-            onChange={handleFileChange}
-            className="hidden"
-          />
+          {isDragging ? '📂' : '📁'}
         </div>
-
-        <ExportGuide />
-      </>
+        <p className="text-text text-sm mb-1">
+          {isDragging
+            ? 'Drop your CSV here'
+            : 'Drop your CSV here or click to browse'}
+        </p>
+        <p className="text-muted text-xs">
+          Supports IMDb and Letterboxd exports
+        </p>
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".csv"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+      </div>
     );
   };
 
