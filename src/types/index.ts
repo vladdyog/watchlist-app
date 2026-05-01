@@ -12,6 +12,7 @@ export type Movie = {
 export type FilterOptions = {
   minRating?: number;
   genres?: string[];
+  excludedGenres?: string[];
   minRuntime?: number;
   maxRuntime?: number;
   minYear?: number;

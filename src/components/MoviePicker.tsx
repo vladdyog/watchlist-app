@@ -24,31 +24,46 @@ const MoviePicker: React.FC<Props> = ({
 
   const pickRandom = () => {
     if (movies.length === 0) return;
-
     const movie = movies[Math.floor(Math.random() * movies.length)];
-
-    // Normal mode only updates Last Pick
-    if (!deckEnabled) {
-      setShowModal(true);
-    }
-
+    if (!deckEnabled) setShowModal(true);
     onMoviePicked?.(movie);
   };
 
   const isEmpty = movies.length === 0;
-
   const label = deckEnabled
-    ? 'Add to deck'
+    ? 'Add to Deck'
     : lastPick
-      ? 'Pick another'
-      : 'Pick a movie';
+      ? 'Pick Again'
+      : 'Pick a Film';
 
   return (
-    <div className="flex flex-col items-center gap-6 py-4">
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '32px',
+      }}
+    >
       {isEmpty ? (
-        <div className="flex flex-col items-center gap-2 py-4">
-          <p className="text-text text-sm">No movies match your filters</p>
-          <p className="text-muted text-xs">
+        <div style={{ textAlign: 'center', padding: '24px 0' }}>
+          <p
+            style={{
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            No films match your filters
+          </p>
+          <p
+            style={{
+              fontSize: '0.85rem',
+              color: 'var(--color-muted)',
+              marginTop: '4px',
+              fontWeight: 500,
+            }}
+          >
             Try adjusting or resetting the filters above
           </p>
         </div>
@@ -58,16 +73,24 @@ const MoviePicker: React.FC<Props> = ({
             onClick={pickRandom}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-            className={`
-              px-12 py-4 rounded-full cursor-pointer
-              text-sm font-normal u
-              ${
-                deckEnabled
-                  ? 'bg-surface border border-border text-text hover:border-accent/50'
-                  : 'bg-accent text-bg shadow-lg shadow-accent/25 hover:bg-accent-hover'
-              }
-            `}
+            transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+            style={{
+              padding: deckEnabled ? '13px 32px' : '17px 56px',
+              borderRadius: '50px',
+              border: deckEnabled ? '1px solid var(--color-border)' : 'none',
+              background: deckEnabled
+                ? 'var(--color-surface)'
+                : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+              color: deckEnabled ? 'var(--color-text-secondary)' : 'white',
+              fontSize: deckEnabled ? '0.9rem' : '1.1rem',
+              fontWeight: 700,
+              fontFamily: 'var(--font-body)',
+              cursor: 'pointer',
+              letterSpacing: '-0.01em',
+              boxShadow: deckEnabled
+                ? 'none'
+                : '0 0 40px rgba(255,128,0,0.3), 0 8px 24px rgba(255,128,0,0.2)',
+            }}
           >
             {label}
           </motion.button>
@@ -79,30 +102,70 @@ const MoviePicker: React.FC<Props> = ({
         <MovieModal movie={lastPick} onClose={() => setShowModal(false)} />
       )}
 
-      {/* Last Pick — normal mode only */}
+      {/* Last pick — normal mode */}
       {!deckEnabled && (
         <AnimatePresence>
           {lastPick && !showModal && (
             <motion.div
               key={lastPick.title}
-              className="w-full max-w-sm"
-              initial={{ opacity: 0, y: 8 }}
+              style={{ width: '100%', maxWidth: '420px' }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
             >
-              <p className="text-muted text-xs uppercase tracking-wider mb-3 text-center">
-                Last pick
-              </p>
+              {/* Label */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '14px',
+                }}
+              >
+                <div
+                  style={{
+                    flex: 1,
+                    height: '1px',
+                    background: 'var(--color-border)',
+                  }}
+                />
+                <p
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-accent)',
+                  }}
+                >
+                  Tonight's Pick
+                </p>
+                <div
+                  style={{
+                    flex: 1,
+                    height: '1px',
+                    background: 'var(--color-border)',
+                  }}
+                />
+              </div>
 
               <div
-                className="cursor-pointer"
+                style={{ cursor: 'pointer' }}
                 onClick={() => setShowModal(true)}
               >
                 <MovieCard movie={lastPick} compact />
               </div>
 
-              <p className="text-center text-muted text-xs mt-2">
+              <p
+                style={{
+                  textAlign: 'center',
+                  fontSize: '0.8rem',
+                  color: 'var(--color-muted)',
+                  marginTop: '10px',
+                  fontWeight: 500,
+                }}
+              >
                 Click to expand
               </p>
             </motion.div>

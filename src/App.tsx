@@ -35,43 +35,29 @@ const App: React.FC = () => {
   const [movies, setMovies] = useState<Movie[]>(
     () => loadFromStorage<Movie[]>(STORAGE_KEY) ?? [],
   );
-
   const [deck, setDeck] = useState<Movie[]>(
     () => loadFromStorage<Movie[]>(DECK_KEY) ?? [],
   );
-
   const [deckEnabled, setDeckEnabled] = useState<boolean>(
     () => loadFromStorage<boolean>(DECK_ENABLED_KEY) ?? false,
   );
-
   const [filters, setFilters] = useState<FilterOptions>({});
   const [error, setError] = useState<string | null>(null);
-
   const [progress, setProgress] = useState<{
     completed: number;
     total: number;
   } | null>(null);
-
   const [enrichmentTime, setEnrichmentTime] = useState<number | null>(null);
-
-  // Shared Last Pick
   const [lastPick, setLastPick] = useState<Movie | null>(null);
-
-  // Deck session
   const [shuffleActive, setShuffleActive] = useState(false);
-
   const [showDeckWinnerModal, setShowDeckWinnerModal] = useState(false);
 
   useEffect(() => {
-    if (progress === null) {
-      saveToStorage(STORAGE_KEY, movies);
-    }
+    if (progress === null) saveToStorage(STORAGE_KEY, movies);
   }, [movies, progress]);
-
   useEffect(() => {
     saveToStorage(DECK_KEY, deck);
   }, [deck]);
-
   useEffect(() => {
     saveToStorage(DECK_ENABLED_KEY, deckEnabled);
   }, [deckEnabled]);
@@ -81,69 +67,91 @@ const App: React.FC = () => {
     setEnrichmentTime(null);
     setFilters({});
     setError(null);
-
     const start = performance.now();
-
     const enriched = await enrichAllMovies(
       rawMovies,
       TMDB_TOKEN,
       (completed, total) => setProgress({ completed, total }),
     );
-
     setMovies(enriched);
     setProgress(null);
     setEnrichmentTime((performance.now() - start) / 1000);
   };
 
   const handleMoviePicked = (movie: Movie) => {
-    // Normal picker mode
     if (!deckEnabled) {
       setLastPick(movie);
       return;
     }
-
-    // Deck mode — only add to deck
     setDeck((prev) =>
       prev.some((m) => m.title === movie.title) ? prev : [...prev, movie],
     );
   };
 
-  const handleShuffleStart = () => {
-    setShuffleActive(true);
-  };
-
-  // Confirmed winner only
   const handleWatchThis = (winner: Movie) => {
-    // Winner becomes Last Pick
     setLastPick(winner);
-
-    // Clear deck session
     setDeck([]);
-  };
-
-  const handleDeckClose = () => {
-    setShuffleActive(false);
   };
 
   const isEnriching = progress !== null;
   const filteredMovies = filterMovies(movies, filters);
 
   return (
-    <div className="min-h-screen bg-bg flex flex-col">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: 'var(--color-bg)' }}
+    >
       <Analytics />
-      <header className="border-b border-border py-6 text-center">
-        <h1 className="font-display text-4xl font-normal text-text tracking-tight">
-          CueMovie
-        </h1>
 
-        <p className="text-muted text-sm mt-1.5">
-          From your watchlist to tonight's pick.
-        </p>
+      {/* ── Header ── */}
+      <header
+        style={{
+          borderBottom: '1px solid var(--color-border)',
+          background: 'var(--color-surface)',
+        }}
+      >
+        <div style={{ maxWidth: 672, margin: '0 auto', padding: '28px 24px' }}>
+          <h1
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '2.5rem',
+              fontWeight: 800,
+              color: 'var(--color-text)',
+              lineHeight: 1.05,
+              letterSpacing: '-0.04em',
+            }}
+          >
+            Cue<span style={{ color: 'var(--color-accent)' }}>Movie</span>
+          </h1>
+          <p
+            style={{
+              fontSize: '0.9rem',
+              color: 'var(--color-text-secondary)',
+              marginTop: '6px',
+              fontWeight: 500,
+            }}
+          >
+            From your watchlist to tonight's pick
+          </p>
+        </div>
       </header>
 
-      <main className="flex-1 w-full max-w-2xl mx-auto px-6 py-12 space-y-12">
+      {/* ── Main ── */}
+      <main
+        style={{
+          flex: 1,
+          maxWidth: 672,
+          width: '100%',
+          margin: '0 auto',
+          padding: '40px 24px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '44px',
+        }}
+      >
         {/* Upload */}
-        <Section title="Watchlist">
+        <section>
+          <SectionLabel>Your Watchlist</SectionLabel>
           <CSVUpload
             movieCount={movies.length}
             isEnriching={isEnriching}
@@ -152,41 +160,71 @@ const App: React.FC = () => {
             onMoviesLoaded={handleMoviesLoaded}
             onError={setError}
           />
-
-          {error && <p className="text-danger text-sm mt-3">{error}</p>}
-        </Section>
+          {error && (
+            <p
+              style={{
+                color: 'var(--color-danger)',
+                fontSize: '0.9rem',
+                marginTop: '10px',
+                fontWeight: 500,
+              }}
+            >
+              {error}
+            </p>
+          )}
+        </section>
 
         {!isEnriching && movies.length > 0 && (
           <>
             {/* Filters */}
-            <Section title="Filters">
+            <section>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '18px',
+                }}
+              >
+                <SectionLabel noMargin>Filters</SectionLabel>
+                <span
+                  style={{
+                    fontSize: '0.875rem',
+                    color: 'var(--color-text-secondary)',
+                    fontWeight: 500,
+                  }}
+                >
+                  <span style={{ color: 'var(--color-text)', fontWeight: 700 }}>
+                    {filteredMovies.length}
+                  </span>
+                  {' / '}
+                  <span>{movies.length} films</span>
+                </span>
+              </div>
               <MovieFilters
                 movies={movies}
                 filters={filters}
                 onChange={setFilters}
               />
-
-              <p className="text-muted text-sm mt-3">
-                {filteredMovies.length} / {movies.length} movies match
-              </p>
-            </Section>
+            </section>
 
             {/* Picker */}
             <section>
-              <div className="flex items-center justify-between mb-5 pb-2.5 border-b border-border">
-                <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest">
-                  Pick a Movie
-                </h2>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '28px',
+                }}
+              >
+                <SectionLabel noMargin>Pick a Film</SectionLabel>
 
-                <label className="flex items-center gap-2 text-xs text-muted cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={deckEnabled}
-                    onChange={(e) => setDeckEnabled(e.target.checked)}
-                    className="accent-accent w-3.5 h-3.5"
-                  />
-                  DECK MODE
-                </label>
+                {/* Deck mode toggle button */}
+                <DeckToggle
+                  enabled={deckEnabled}
+                  onToggle={() => setDeckEnabled((v) => !v)}
+                />
               </div>
 
               <MoviePicker
@@ -198,13 +236,13 @@ const App: React.FC = () => {
               />
 
               {deckEnabled && (
-                <div className="mt-2">
+                <div style={{ marginTop: '12px' }}>
                   <MovieDeck
                     movies={deck}
                     shuffleActive={shuffleActive}
-                    onShuffleStart={handleShuffleStart}
+                    onShuffleStart={() => setShuffleActive(true)}
                     onWatchThis={handleWatchThis}
-                    onClose={handleDeckClose}
+                    onClose={() => setShuffleActive(false)}
                     onRemove={(m) =>
                       setDeck((prev) => prev.filter((w) => w.title !== m.title))
                     }
@@ -213,21 +251,72 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              {/* Deck mode Last Pick */}
+              {/* Deck mode last pick — same layout as normal mode */}
               {deckEnabled && lastPick && !shuffleActive && (
-                <div className="mt-8">
-                  <p className="text-muted text-xs uppercase tracking-wider mb-3 text-center">
-                    Last pick
-                  </p>
-
+                <div
+                  style={{
+                    marginTop: '32px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0',
+                  }}
+                >
                   <div
-                    className="w-full max-w-sm mx-auto cursor-pointer"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      marginBottom: '14px',
+                      width: '100%',
+                      maxWidth: '420px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        height: '1px',
+                        background: 'var(--color-border)',
+                      }}
+                    />
+                    <p
+                      style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-accent)',
+                      }}
+                    >
+                      Tonight's Pick
+                    </p>
+                    <div
+                      style={{
+                        flex: 1,
+                        height: '1px',
+                        background: 'var(--color-border)',
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      maxWidth: '420px',
+                      cursor: 'pointer',
+                    }}
                     onClick={() => setShowDeckWinnerModal(true)}
                   >
                     <MovieCard movie={lastPick} compact />
                   </div>
-
-                  <p className="text-center text-muted text-xs mt-2">
+                  <p
+                    style={{
+                      textAlign: 'center',
+                      fontSize: '0.8rem',
+                      color: 'var(--color-muted)',
+                      marginTop: '10px',
+                      fontWeight: 500,
+                    }}
+                  >
                     Click to expand
                   </p>
                 </div>
@@ -243,33 +332,114 @@ const App: React.FC = () => {
           </>
         )}
       </main>
-      <footer className="border-t border-border mt-16 py-6 text-center">
-        <p className="text-xs text-muted">
+
+      {/* ── Footer ── */}
+      <footer
+        style={{
+          borderTop: '1px solid var(--color-border)',
+          padding: '24px',
+          textAlign: 'center',
+        }}
+      >
+        <p
+          style={{
+            fontSize: '0.8rem',
+            color: 'var(--color-muted)',
+            fontWeight: 500,
+          }}
+        >
           CueMovie · v{APP_VERSION} · © 2026 {AUTHOR}
         </p>
         <a
-          className="text-xs text-muted hover:underline"
           href="https://www.flaticon.com/free-icons/clapper"
-          title="clapper icons"
+          style={{
+            fontSize: '0.75rem',
+            color: 'var(--color-muted)',
+            textDecoration: 'none',
+            marginTop: '4px',
+            display: 'block',
+          }}
         >
-          Clapper icons created by Uniconlabs - Flaticon
+          Icons by Uniconlabs / Flaticon
         </a>
       </footer>
     </div>
   );
 };
 
-const Section: React.FC<{
-  title: string;
+/* Section heading */
+const SectionLabel: React.FC<{
   children: React.ReactNode;
-}> = ({ title, children }) => (
-  <section>
-    <h2 className="font-body text-xs font-normal text-accent uppercase tracking-widest mb-5 pb-2.5 border-b border-border">
-      {title}
-    </h2>
-
+  noMargin?: boolean;
+}> = ({ children, noMargin }) => (
+  <h2
+    style={{
+      fontSize: '0.8rem',
+      fontWeight: 700,
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+      color: 'var(--color-accent)',
+      marginBottom: noMargin ? 0 : '18px',
+    }}
+  >
     {children}
-  </section>
+  </h2>
+);
+
+/* Deck mode toggle — knob + label only, no surrounding border or background */
+const DeckToggle: React.FC<{ enabled: boolean; onToggle: () => void }> = ({
+  enabled,
+  onToggle,
+}) => (
+  <button
+    onClick={onToggle}
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '9px',
+      padding: '4px 0',
+      border: 'none',
+      background: 'transparent',
+      color: enabled ? 'var(--color-accent)' : 'var(--color-muted)',
+      fontSize: '0.8rem',
+      fontWeight: 700,
+      fontFamily: 'var(--font-body)',
+      cursor: 'pointer',
+      letterSpacing: '0.05em',
+      textTransform: 'uppercase',
+      transition: 'color 0.18s ease',
+      userSelect: 'none',
+    }}
+  >
+    {/* Knob track */}
+    <span
+      style={{
+        display: 'inline-block',
+        width: 30,
+        height: 17,
+        borderRadius: 9,
+        background: enabled ? 'var(--color-accent)' : 'var(--color-border)',
+        position: 'relative',
+        transition: 'background 0.18s ease',
+        flexShrink: 0,
+      }}
+    >
+      <span
+        style={{
+          position: 'absolute',
+          top: 2.5,
+          left: enabled ? 15 : 2.5,
+          width: 12,
+          height: 12,
+          borderRadius: '50%',
+          background: 'white',
+          transition: 'left 0.18s ease',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+        }}
+      />
+    </span>
+    Deck mode
+  </button>
 );
 
 export default App;

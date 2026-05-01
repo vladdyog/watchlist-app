@@ -11,25 +11,22 @@ type Props = {
   onClear: () => void;
   shuffleActive: boolean;
   onShuffleStart: () => void;
-  /** Called with the confirmed winner. Does NOT close the overlay — onClose does. */
   onWatchThis: (movie: Movie) => void;
   onClose: () => void;
 };
 
-const CARD_WIDTH = 120;
-const CARD_HEIGHT = 180;
-const CARD_OFFSET = 40;
+const CARD_WIDTH = 140;
+const CARD_HEIGHT = 210;
+const CARD_OFFSET = 48;
 const SHUFFLE_DURATION = 3500;
-const OVERLAY_SCALE = 1.65;
+const OVERLAY_SCALE = 1.55;
+const HOVER_LIFT = 42;
+const CONTAINER_TOP_BUFFER = 50;
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
+const getFanRotation = (i: number, total: number) =>
+  (i - (total - 1) / 2) * 2.5;
 
-const getFanRotation = (i: number, total: number) => {
-  const center = (total - 1) / 2;
-  return (i - center) * 2.5;
-};
-
-// ── Poster card ───────────────────────────────────────────────────────────────
 const PosterCard: React.FC<{
   movie: Movie;
   index: number;
@@ -60,28 +57,44 @@ const PosterCard: React.FC<{
   onRemove,
 }) => {
   const isLifted = isHovered || isActive || isWinner;
-  const showInfo = (isHovered || isWinner) && !isShuffling;
+
+  let borderColor = 'var(--color-border)';
+  let glow = 'none';
+  if (isWinner) {
+    borderColor = 'var(--color-accent)';
+    glow = '0 0 28px rgba(255,128,0,0.4), 0 6px 20px rgba(0,0,0,0.5)';
+  } else if (isActive) {
+    borderColor = 'rgba(255,128,0,0.45)';
+    glow = '0 4px 16px rgba(0,0,0,0.4)';
+  } else if (isHovered) {
+    borderColor = 'var(--color-border-light)';
+    glow = '0 6px 20px rgba(0,0,0,0.4)';
+  }
+
+  // Winner card: no info overlay — title/year are shown below the fan instead.
+  // Non-winner hovered card: show info overlay as usual.
+  const showInfo = isHovered && !isShuffling && !isWinner;
 
   return (
     <motion.div
       className="absolute cursor-pointer"
       style={{
-        width: `${CARD_WIDTH}px`,
-        height: `${CARD_HEIGHT}px`,
-        left: `${index * CARD_OFFSET}px`,
+        width: CARD_WIDTH,
+        height: CARD_HEIGHT,
+        left: index * CARD_OFFSET,
         bottom: 0,
         originX: '50%',
         originY: '100%',
         zIndex: isLifted ? 50 : index,
-        perspective: '600px',
+        perspective: 800,
       }}
       animate={{
         x: nudge,
-        y: isLifted ? -70 : 0,
+        y: isLifted ? -HOVER_LIFT : 0,
         rotate: isLifted ? 0 : getFanRotation(index, total),
-        scale: isLifted ? 1.08 : 1,
+        scale: isLifted ? 1.05 : 1,
       }}
-      transition={{ type: 'spring', stiffness: 200, damping: 32 }}
+      transition={{ type: 'spring', stiffness: 220, damping: 34 }}
       onHoverStart={() => !isShuffling && onHoverStart()}
       onHoverEnd={onHoverEnd}
       onClick={onClick}
@@ -94,36 +107,56 @@ const PosterCard: React.FC<{
           position: 'relative',
         }}
         animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.5, ease: 'easeInOut' }}
+        transition={{ duration: 0.45, ease: 'easeInOut' }}
       >
-        {/* Front */}
+        {/* ── Front ── */}
         <div
-          className={`
-            absolute inset-0 rounded-xl overflow-hidden border-2 transition-colors duration-200
-            ${
-              isWinner
-                ? 'border-accent shadow-xl shadow-accent/40'
-                : isActive
-                  ? 'border-accent/50'
-                  : isHovered
-                    ? 'border-accent'
-                    : 'border-border'
-            }
-          `}
-          style={{ backfaceVisibility: 'hidden' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            border: `2px solid ${borderColor}`,
+            boxShadow: glow,
+            transition: 'border-color 0.2s, box-shadow 0.2s',
+            backfaceVisibility: 'hidden',
+          }}
         >
           <AnimatePresence>
             {isHovered && !isShuffling && !isFlipped && (
               <motion.button
-                initial={{ opacity: 0, scale: 0.6 }}
+                initial={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.6 }}
-                transition={{ duration: 0.15 }}
+                exit={{ opacity: 0, scale: 0.7 }}
+                transition={{ duration: 0.12 }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemove();
                 }}
-                className="absolute top-1 right-1 z-50 w-6 h-6 rounded-full bg-black/70 text-white text-xs flex items-center justify-center hover:bg-red-500 transition"
+                style={{
+                  position: 'absolute',
+                  top: 5,
+                  right: 5,
+                  zIndex: 50,
+                  width: 22,
+                  height: 22,
+                  borderRadius: '50%',
+                  background: 'rgba(0,0,0,0.8)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: 'white',
+                  fontSize: '0.65rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = 'var(--color-danger)')
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = 'rgba(0,0,0,0.8)')
+                }
               >
                 ✕
               </motion.button>
@@ -134,14 +167,31 @@ const PosterCard: React.FC<{
             <img
               src={movie.poster}
               alt={movie.title}
-              className="w-full h-full object-cover"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
             />
           ) : (
-            <div className="w-full h-full bg-surface flex items-center justify-center text-3xl">
-              🎬
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                background:
+                  'linear-gradient(145deg, var(--color-surface-2) 0%, var(--color-border) 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '2.5rem',
+              }}
+            >
+              <span style={{ opacity: 0.25 }}>🎬</span>
             </div>
           )}
 
+          {/* Hover info overlay (non-winner cards only) */}
           <AnimatePresence>
             {showInfo && (
               <motion.div
@@ -149,23 +199,61 @@ const PosterCard: React.FC<{
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="absolute inset-0 rounded-xl flex flex-col justify-end p-2"
                 style={{
+                  position: 'absolute',
+                  inset: 0,
+                  borderRadius: '10px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  padding: '10px',
                   background:
-                    'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 55%)',
+                    'linear-gradient(to top, rgba(0,0,0,0.94) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)',
                 }}
               >
-                <p className="text-white text-xs font-medium leading-tight line-clamp-2">
+                <p
+                  style={{
+                    color: 'white',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    lineHeight: 1.3,
+                    WebkitLineClamp: 2,
+                    overflow: 'hidden',
+                    display: '-webkit-box',
+                    WebkitBoxOrient: 'vertical',
+                  }}
+                >
                   {movie.title}
                 </p>
-                <div className="flex items-center gap-1.5 mt-0.5">
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '7px',
+                    marginTop: '4px',
+                    alignItems: 'center',
+                  }}
+                >
                   {movie.year && (
-                    <p className="text-white/60 text-xs">{movie.year}</p>
+                    <span
+                      style={{
+                        color: 'rgba(255,255,255,0.55)',
+                        fontSize: '0.72rem',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {movie.year}
+                    </span>
                   )}
                   {movie.rating && (
-                    <p className="text-accent text-xs">
+                    <span
+                      style={{
+                        color: 'var(--color-green)',
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                      }}
+                    >
                       ★ {movie.rating.toFixed(1)}
-                    </p>
+                    </span>
                   )}
                 </div>
               </motion.div>
@@ -173,19 +261,58 @@ const PosterCard: React.FC<{
           </AnimatePresence>
         </div>
 
-        {/* Back */}
+        {/* ── Back — opaque ── */}
         <div
-          className="absolute inset-0 rounded-xl border-2 border-border bg-surface flex items-center justify-center"
-          style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '10px',
+            border: '2px solid var(--color-border-light)',
+            background: 'linear-gradient(145deg, #1C2228 0%, #252D35 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+          }}
         >
-          <div className="text-4xl opacity-20">🎬</div>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px',
+              opacity: 0.18,
+            }}
+          >
+            <span style={{ fontSize: '2rem' }}>🎬</span>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                alignItems: 'center',
+              }}
+            >
+              {[40, 28, 36].map((w, i) => (
+                <div
+                  key={i}
+                  style={{
+                    height: 2,
+                    width: w,
+                    borderRadius: 1,
+                    background: 'var(--color-text)',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </motion.div>
     </motion.div>
   );
 };
 
-// ── Main ──────────────────────────────────────────────────────────────────────
 const MovieDeck: React.FC<Props> = ({
   movies,
   onRemove,
@@ -198,17 +325,23 @@ const MovieDeck: React.FC<Props> = ({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isShuffling, setIsShuffling] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  // Single source of truth: the actual winner object — no title-based lookup.
   const [winnerMovie, setWinnerMovie] = useState<Movie | null>(null);
-  // True once the user (or auto-win) confirms the pick; overlay transforms to reveal screen.
   const [watchAccepted, setWatchAccepted] = useState(false);
   const [modalMovie, setModalMovie] = useState<Movie | null>(null);
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
-
   const animRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  // If the current winner card is removed before it's been accepted, reset.
+  // Escape key — works both in shuffle state and winner reveal state
+  useEffect(() => {
+    if (!shuffleActive) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [shuffleActive, onClose]);
+
   useEffect(() => {
     if (
       !watchAccepted &&
@@ -221,7 +354,6 @@ const MovieDeck: React.FC<Props> = ({
     }
   }, [movies, winnerMovie, watchAccepted]);
 
-  // Scroll-lock while overlay is open.
   useEffect(() => {
     if (shuffleActive) {
       document.body.style.overflow = 'hidden';
@@ -231,7 +363,6 @@ const MovieDeck: React.FC<Props> = ({
     }
   }, [shuffleActive]);
 
-  // Full reset when overlay is dismissed (X button or App-level close).
   const prevShuffleRef = useRef(false);
   useEffect(() => {
     if (prevShuffleRef.current && !shuffleActive) {
@@ -245,14 +376,11 @@ const MovieDeck: React.FC<Props> = ({
     prevShuffleRef.current = shuffleActive;
   }, [shuffleActive]);
 
-  // ── Animation ──────────────────────────────────────────────────────────────
   const runSpin = (pool: Movie[]) => {
     if (pool.length < 2) return;
     if (animRef.current) cancelAnimationFrame(animRef.current);
-
     const picked = Math.floor(Math.random() * pool.length);
     const totalTicks = 5 * pool.length + picked;
-
     setWinnerMovie(null);
     setWatchAccepted(false);
     setHoveredIndex(null);
@@ -269,7 +397,6 @@ const MovieDeck: React.FC<Props> = ({
         setActiveIndex(
           Math.floor(easeOut(progress) * totalTicks) % pool.length,
         );
-
         if (progress < 1) {
           animRef.current = requestAnimationFrame(animate);
         } else {
@@ -279,7 +406,7 @@ const MovieDeck: React.FC<Props> = ({
             n.delete(picked);
             return n;
           });
-          setWinnerMovie(pool[picked]); // store the full object — no title lookup needed
+          setWinnerMovie(pool[picked]);
           setIsShuffling(false);
         }
       };
@@ -287,7 +414,6 @@ const MovieDeck: React.FC<Props> = ({
     }, 600);
   };
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
   const handleShuffle = () => {
     onShuffleStart();
     runSpin(movies);
@@ -296,7 +422,7 @@ const MovieDeck: React.FC<Props> = ({
   const handleWatchThis = () => {
     if (!winnerMovie) return;
     setWatchAccepted(true);
-    onWatchThis(winnerMovie); // App stores deckWinner + clears deck; overlay stays open
+    onWatchThis(winnerMovie);
   };
 
   const handleEliminate = () => {
@@ -306,21 +432,18 @@ const MovieDeck: React.FC<Props> = ({
     setWinnerMovie(null);
     setActiveIndex(null);
     setFlippedCards(new Set());
-
     if (remaining.length === 1) {
-      // Auto-win: immediately confirm the last card as winner.
-      const autoWinner = remaining[0];
-      setWinnerMovie(autoWinner);
+      setWinnerMovie(remaining[0]);
       setWatchAccepted(true);
-      onWatchThis(autoWinner);
+      onWatchThis(remaining[0]);
     } else if (remaining.length >= 2) {
       setTimeout(() => runSpin(remaining), 300);
     }
   };
 
-  // ── Derived layout ─────────────────────────────────────────────────────────
   const cardCount = Math.max(1, movies.length);
   const deckWidth = CARD_WIDTH + CARD_OFFSET * (cardCount - 1);
+  const containerHeight = CARD_HEIGHT + CONTAINER_TOP_BUFFER;
 
   const renderFan = () =>
     movies.map((movie, i) => (
@@ -344,46 +467,83 @@ const MovieDeck: React.FC<Props> = ({
       />
     ));
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  const btnBase: React.CSSProperties = {
+    fontFamily: 'var(--font-body)',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    borderRadius: '50px',
+    fontWeight: 700,
+    fontSize: '0.9rem',
+  };
+
   return (
-    <div className="space-y-8">
-      {/* In-page view — hidden while overlay is open */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {!shuffleActive && (
         <>
           {movies.length > 0 ? (
             <div
-              className="relative mx-auto"
               style={{
-                width: `${deckWidth}px`,
-                height: `${CARD_HEIGHT + 80}px`,
+                position: 'relative',
+                margin: '0 auto',
+                width: deckWidth,
+                height: containerHeight,
+                overflow: 'visible',
               }}
             >
               {renderFan()}
             </div>
           ) : (
-            <div className="text-center py-8 space-y-1">
-              <p className="text-muted text-sm">No movies on the deck yet.</p>
-              <p className="text-muted text-xs">
-                Pick some movies to get started!
+            <div style={{ textAlign: 'center', padding: '28px 0' }}>
+              <p
+                style={{
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  color: 'var(--color-text-secondary)',
+                }}
+              >
+                No films in the deck yet.
+              </p>
+              <p
+                style={{
+                  fontSize: '0.85rem',
+                  color: 'var(--color-muted)',
+                  marginTop: '4px',
+                  fontWeight: 500,
+                }}
+              >
+                Press the button above to add some!
               </p>
             </div>
           )}
 
-          <div className="flex items-center justify-center gap-3">
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+            }}
+          >
             <motion.button
               onClick={handleShuffle}
               disabled={movies.length < 2}
               whileHover={movies.length >= 2 ? { scale: 1.04 } : {}}
               whileTap={movies.length >= 2 ? { scale: 0.96 } : {}}
-              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-              className={`
-                px-8 py-3 rounded-full text-sm font-medium transition-colors duration-150
-                ${
+              transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+              style={{
+                ...btnBase,
+                padding: '12px 28px',
+                background:
                   movies.length < 2
-                    ? 'bg-surface text-muted cursor-not-allowed border border-border'
-                    : 'bg-accent text-bg cursor-pointer shadow-lg shadow-accent/25'
-                }
-              `}
+                    ? 'var(--color-surface-2)'
+                    : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                border:
+                  movies.length < 2 ? '1px solid var(--color-border)' : 'none',
+                color: movies.length < 2 ? 'var(--color-muted)' : 'white',
+                boxShadow:
+                  movies.length < 2 ? 'none' : '0 0 24px rgba(255,128,0,0.22)',
+                cursor: movies.length < 2 ? 'not-allowed' : 'pointer',
+              }}
             >
               Shuffle
             </motion.button>
@@ -394,7 +554,23 @@ const MovieDeck: React.FC<Props> = ({
                   onClear();
                   setFlippedCards(new Set());
                 }}
-                className="px-4 py-3 rounded-full text-xs border border-border text-muted hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
+                style={{
+                  ...btnBase,
+                  padding: '11px 20px',
+                  background: 'transparent',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-secondary)',
+                  fontSize: '0.85rem',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor =
+                    'var(--color-border-light)';
+                  e.currentTarget.style.color = 'var(--color-text)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'var(--color-border)';
+                  e.currentTarget.style.color = 'var(--color-text-secondary)';
+                }}
               >
                 Clear all
               </button>
@@ -402,14 +578,21 @@ const MovieDeck: React.FC<Props> = ({
           </div>
 
           {movies.length === 1 && (
-            <p className="text-center text-muted text-xs">
-              Add at least one more movie to shuffle.
+            <p
+              style={{
+                textAlign: 'center',
+                fontSize: '0.85rem',
+                color: 'var(--color-muted)',
+                fontWeight: 500,
+              }}
+            >
+              Add at least one more film to shuffle.
             </p>
           )}
         </>
       )}
 
-      {/* Fullscreen overlay */}
+      {/* ── Fullscreen shuffle overlay ── */}
       <AnimatePresence>
         {shuffleActive && (
           <motion.div
@@ -417,66 +600,163 @@ const MovieDeck: React.FC<Props> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-50 flex flex-col items-center justify-center"
+            style={{
+              position: 'fixed',
+              inset: 0,
+              zIndex: 50,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'rgba(10,14,18,0.92)',
+                backdropFilter: 'blur(14px)',
+              }}
+            />
 
-            {/* Close */}
             <button
               onClick={onClose}
-              className="absolute top-6 right-6 z-10 w-10 h-10 rounded-full bg-surface border border-border text-muted hover:text-text hover:border-accent transition-all duration-150 flex items-center justify-center text-sm cursor-pointer"
+              style={{
+                position: 'absolute',
+                top: 24,
+                right: 24,
+                zIndex: 10,
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                background: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-secondary)',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.15s',
+                fontFamily: 'var(--font-body)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--color-danger)';
+                e.currentTarget.style.color = 'white';
+                e.currentTarget.style.borderColor = 'var(--color-danger)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--color-surface-2)';
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+                e.currentTarget.style.borderColor = 'var(--color-border)';
+              }}
             >
               ✕
             </button>
 
-            {/* ── Accepted / winner-reveal state ── */}
             <AnimatePresence mode="wait">
               {watchAccepted && winnerMovie ? (
+                /* ── Winner reveal — same max-width as MovieModal (380px) ── */
                 <motion.div
                   key="reveal"
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.35, ease: [0.34, 1.2, 0.64, 1] }}
-                  className="relative z-10 flex flex-col items-center gap-6"
+                  style={{
+                    position: 'relative',
+                    zIndex: 10,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '20px',
+                  }}
                 >
-                  <p className="text-accent text-xs uppercase tracking-widest">
+                  <p
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      color: 'var(--color-accent)',
+                    }}
+                  >
                     Tonight you're watching
                   </p>
-                  <div className="w-[320px] max-w-[85vw]">
+                  {/* Same width as MovieModal for consistency */}
+                  <div
+                    style={{
+                      width: '380px',
+                      maxWidth: '85vw',
+                      maxHeight: '75svh',
+                      overflowY: 'auto',
+                      borderRadius: '14px',
+                    }}
+                  >
                     <MovieCard movie={winnerMovie} />
                   </div>
-                  <button
-                    onClick={onClose}
-                    className="mt-2 px-8 py-2.5 rounded-full text-sm border border-border text-muted hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
+                  <p
+                    style={{
+                      fontSize: '0.78rem',
+                      color: 'var(--color-muted)',
+                      fontWeight: 500,
+                    }}
                   >
-                    Done
-                  </button>
+                    Press{' '}
+                    <kbd
+                      style={{
+                        padding: '2px 7px',
+                        background: 'var(--color-surface-2)',
+                        border: '1px solid var(--color-border-light)',
+                        borderRadius: '5px',
+                        fontSize: '0.75rem',
+                        color: 'var(--color-text-secondary)',
+                        fontFamily: 'var(--font-body)',
+                      }}
+                    >
+                      Esc
+                    </kbd>{' '}
+                    or click ✕ to close
+                  </p>
                 </motion.div>
               ) : (
-                /* ── Shuffle / selection state ── */
+                /* ── Shuffle / winner decision ── */
                 <motion.div
                   key="shuffle"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="relative z-10 flex flex-col items-center gap-16"
+                  style={{
+                    position: 'relative',
+                    zIndex: 10,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '40px',
+                  }}
                 >
-                  {/* Scaled deck fan */}
+                  {/* Scaled fan */}
                   <div
                     style={{
-                      width: `${deckWidth * OVERLAY_SCALE}px`,
-                      height: `${(CARD_HEIGHT + 80) * OVERLAY_SCALE}px`,
+                      width: deckWidth * OVERLAY_SCALE,
+                      height: containerHeight * OVERLAY_SCALE,
                       position: 'relative',
                     }}
                   >
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
                       <div
-                        className="relative"
                         style={{
-                          width: `${deckWidth}px`,
-                          height: `${CARD_HEIGHT + 80}px`,
+                          position: 'relative',
+                          width: deckWidth,
+                          height: containerHeight,
                           transform: `scale(${OVERLAY_SCALE})`,
                           transformOrigin: 'center center',
                         }}
@@ -486,36 +766,97 @@ const MovieDeck: React.FC<Props> = ({
                     </div>
                   </div>
 
-                  {/* Winner action buttons */}
-                  <div className="min-h-[72px] flex items-center justify-center">
+                  {/* Winner title + year below the fan, then action buttons */}
+                  <div
+                    style={{
+                      minHeight: 96,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '16px',
+                    }}
+                  >
                     <AnimatePresence>
                       {winnerMovie && !isShuffling && (
                         <motion.div
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: 8 }}
-                          transition={{ duration: 0.2 }}
-                          className="flex flex-col items-center gap-3"
+                          transition={{ duration: 0.22 }}
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '16px',
+                          }}
                         >
-                          <p className="text-text text-sm">
-                            🎬{' '}
-                            <span className="font-medium">
+                          {/* Title and year below the fan */}
+                          <div style={{ textAlign: 'center' }}>
+                            <p
+                              style={{
+                                fontSize: '1.25rem',
+                                fontWeight: 800,
+                                color: 'var(--color-text)',
+                                letterSpacing: '-0.02em',
+                                lineHeight: 1.2,
+                              }}
+                            >
                               {winnerMovie.title}
-                            </span>
-                            {winnerMovie.year ? ` (${winnerMovie.year})` : ''}
-                          </p>
-                          <div className="flex gap-3">
+                            </p>
+                            {winnerMovie.year && (
+                              <p
+                                style={{
+                                  fontSize: '0.9rem',
+                                  color: 'var(--color-text-secondary)',
+                                  fontWeight: 500,
+                                  marginTop: '4px',
+                                }}
+                              >
+                                {winnerMovie.year}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Action buttons */}
+                          <div style={{ display: 'flex', gap: '10px' }}>
                             <button
                               onClick={handleWatchThis}
-                              className="px-5 py-2 rounded-full text-sm bg-accent text-bg font-medium cursor-pointer hover:bg-accent-hover transition-colors duration-150"
+                              style={{
+                                ...btnBase,
+                                padding: '13px 28px',
+                                background:
+                                  'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+                                border: 'none',
+                                color: 'white',
+                                boxShadow: '0 0 24px rgba(255,128,0,0.3)',
+                              }}
                             >
                               Watch this!
                             </button>
                             <button
                               onClick={handleEliminate}
-                              className="px-5 py-2 rounded-full text-sm border border-border text-muted hover:border-accent/50 hover:text-text transition-all duration-150 cursor-pointer"
+                              style={{
+                                ...btnBase,
+                                padding: '12px 20px',
+                                background: 'transparent',
+                                border: '1px solid var(--color-border)',
+                                color: 'var(--color-text-secondary)',
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor =
+                                  'var(--color-border-light)';
+                                e.currentTarget.style.color =
+                                  'var(--color-text)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor =
+                                  'var(--color-border)';
+                                e.currentTarget.style.color =
+                                  'var(--color-text-secondary)';
+                              }}
                             >
-                              Eliminate & Shuffle again
+                              Eliminate & shuffle again
                             </button>
                           </div>
                         </motion.div>
@@ -529,7 +870,6 @@ const MovieDeck: React.FC<Props> = ({
         )}
       </AnimatePresence>
 
-      {/* Card detail modal */}
       {modalMovie && (
         <MovieModal movie={modalMovie} onClose={() => setModalMovie(null)} />
       )}

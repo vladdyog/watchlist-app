@@ -20,46 +20,107 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
 
   return (
     <AnimatePresence>
-      {/* Backdrop */}
       <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center px-4"
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
+        }}
         initial={{
           backgroundColor: 'rgba(0,0,0,0)',
           backdropFilter: 'blur(0px)',
         }}
         animate={{
-          backgroundColor: 'rgba(0,0,0,0.75)',
-          backdropFilter: 'blur(6px)',
+          backgroundColor: 'rgba(10,12,16,0.88)',
+          backdropFilter: 'blur(10px)',
         }}
         exit={{ backgroundColor: 'rgba(0,0,0,0)', backdropFilter: 'blur(0px)' }}
         transition={{ duration: 0.2 }}
         onClick={onClose}
       >
-        {/* Card */}
         <motion.div
-          className="relative w-full max-w-sm max-h-[85svh] flex flex-col"
-          initial={{ opacity: 0, scale: 0.85, y: 30 }}
+          style={{
+            position: 'relative',
+            width: '100%',
+            maxWidth: '380px',
+            maxHeight: '90svh',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.85, y: 30 }}
-          transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+          exit={{ opacity: 0, scale: 0.92, y: 16 }}
+          transition={{ duration: 0.25, ease: [0.34, 1.3, 0.64, 1] }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute -top-3 -right-3 z-10 w-9 h-9 rounded-full bg-surface border border-border text-muted hover:text-text hover:border-accent transition-all duration-150 flex items-center justify-center text-sm cursor-pointer"
+            style={{
+              position: 'absolute',
+              top: '-14px',
+              right: '-14px',
+              zIndex: 10,
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              background: 'var(--color-surface-2)',
+              border: '1px solid var(--color-border-light)',
+              color: 'var(--color-text-secondary)',
+              fontSize: '0.875rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: 'var(--font-body)',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--color-danger)';
+              e.currentTarget.style.color = 'white';
+              e.currentTarget.style.borderColor = 'var(--color-danger)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--color-surface-2)';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+              e.currentTarget.style.borderColor = 'var(--color-border-light)';
+            }}
           >
             ✕
           </button>
 
-          {/* Scrollable card body */}
-          <div className="overflow-y-auto rounded-xl">
+          {/* Card */}
+          <div style={{ overflowY: 'auto', borderRadius: '14px' }}>
             <MovieCard movie={movie} />
           </div>
 
-          <p className="text-center text-muted text-xs mt-4 flex-shrink-0">
+          {/* Hint */}
+          <p
+            style={{
+              textAlign: 'center',
+              fontSize: '0.78rem',
+              color: 'var(--color-muted)',
+              marginTop: '14px',
+              fontWeight: 500,
+              flexShrink: 0,
+            }}
+          >
             Press{' '}
-            <kbd className="px-1.5 py-0.5 bg-surface border border-border rounded text-xs">
+            <kbd
+              style={{
+                padding: '2px 7px',
+                background: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border-light)',
+                borderRadius: '5px',
+                fontSize: '0.75rem',
+                color: 'var(--color-text-secondary)',
+                fontFamily: 'var(--font-body)',
+              }}
+            >
               Esc
             </kbd>{' '}
             or click outside to close

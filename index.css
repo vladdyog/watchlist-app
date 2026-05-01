@@ -1,18 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 @import 'tailwindcss';
 
 @theme {
-  --color-bg: #0f0f0f;
-  --color-surface: #1a1a1a;
-  --color-border: #2a2a2a;
-  --color-text: #f0ead6;
-  --color-muted: #7a7060;
-  --color-accent: #e8a020;
-  --color-accent-hover: #f0b030;
-  --color-danger: #e05050;
+  --color-bg: #14181c;
+  --color-surface: #1c2228;
+  --color-surface-2: #252d35;
+  --color-border: #2c3440;
+  --color-border-light: #3a4555;
 
-  --font-display: 'DM Serif Display', serif;
-  --font-body: 'DM Sans', sans-serif;
+  --color-text: #ffffff;
+  --color-text-secondary: #8899aa;
+  --color-muted: #556677;
+
+  --color-accent: #ff8000;
+  --color-accent-hover: #ff9a25;
+  --color-green: #00e054;
+  --color-blue: #40bcf4;
+  --color-danger: #e55353;
+
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 * {
@@ -23,11 +30,28 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-body);
-  font-weight: 300;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 input[type='number']::-webkit-inner-spin-button,
 input[type='number']::-webkit-outer-spin-button {
-  opacity: 0.5;
+  opacity: 0.4;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-light);
 }

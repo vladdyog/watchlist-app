@@ -14,7 +14,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier . --write"
+    "format": "npx prettier . --write"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
