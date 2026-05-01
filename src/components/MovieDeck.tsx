@@ -285,7 +285,7 @@ const PosterCard: React.FC<{
               opacity: 0.18,
             }}
           >
-            <span style={{ fontSize: '2rem' }}>🎬</span>
+            <span style={{ fontSize: '2rem' }}>?</span>
             <div
               style={{
                 display: 'flex',
@@ -431,13 +431,12 @@ const MovieDeck: React.FC<Props> = ({
     const remaining = movies.filter((m) => m.title !== winnerMovie.title);
     setWinnerMovie(null);
     setActiveIndex(null);
-    setFlippedCards(new Set());
     if (remaining.length === 1) {
       setWinnerMovie(remaining[0]);
       setWatchAccepted(true);
       onWatchThis(remaining[0]);
     } else if (remaining.length >= 2) {
-      setTimeout(() => runSpin(remaining), 300);
+      runSpin(remaining);
     }
   };
 
@@ -511,7 +510,7 @@ const MovieDeck: React.FC<Props> = ({
                   fontWeight: 500,
                 }}
               >
-                Click the button above to add some!
+                Pick some films above to add them!
               </p>
             </div>
           )}
