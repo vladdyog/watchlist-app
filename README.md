@@ -1,26 +1,26 @@
-# Movie Selector
+# CueMovie
 
-A (currently) minimal web app that helps you pick a random movie from your watchlist.
+A web app that helps you pick a random movie from your watchlist.
 
-All you need to do is upload the CSV export from your **IMDb** or **Letterboxd** account, and the app will pick a random movie for you.
+Upload the CSV export from your **IMDb** or **Letterboxd** account, and the app enriches your list with data from TMDb — then picks a random movie for you.
 
 Your list is saved in the browser, so it's still there next time you open it!
 
 ---
 
-## Features
-
-As of April 22, 2026:
+## Features <sup><small>As of May 1, 2026</small></sup>
 
 - Upload a watchlist CSV from IMDb or Letterboxd.
-- Pick a random movie from your list.
-- Persist your list in the browser. (no account or server needed)
+- Automatically enriches movies with ratings, genres, runtime, posters, and overviews via the [TMDb API](https://www.themoviedb.org/).
+- Filter your list by rating, runtime, release year, genre, and date added.
+- Pick a random movie from your filtered list.
+- **Deck mode** — queue up multiple picks and shuffle them to choose a winner.
+- Click any result to open a detail modal with poster and overview.
+- Persists your list in the browser (no account or server needed).
 
 ---
 
 ## Supported CSV Formats
-
-Currently the app supports CSVs from IMDb or Letterboxd accounts.
 
 | Source     | How to export                          |
 | ---------- | -------------------------------------- |
@@ -29,25 +29,23 @@ Currently the app supports CSVs from IMDb or Letterboxd accounts.
 
 **NOTE:** IMDb allows exporting any list you own, not just your watchlist.
 
-Other CSV files may also work if they have a `Title` or `Name` column.
+Other CSV files may also work if they have a `Title`/`Name` and `Year` columns (TMDb enrichment will still be attempted).
 
 ---
 
-## Tech Stack
-
-As of April 22, 2026:
+## Tech Stack <sup><small>As of May 1, 2026</small></sup>
 
 - [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
 - [Vite](https://vitejs.dev/) — dev server and build tool
 - [PapaParse](https://www.papaparse.com/) — CSV parsing
+- [Framer Motion](https://www.framer.com/motion/) — animations
+- [Vercel Analytics](https://vercel.com/analytics) — usage analytics
 
 ---
 
 ## Requirements
 
-As of April 22, 2026:
-
-- [Node.js](https://nodejs.org/) v18 or higher
+- [Node.js](https://nodejs.org/) v20 or higher
 - npm (comes with Node.js)
 
 ---
@@ -73,8 +71,10 @@ Then open [http://localhost:5173](http://localhost:5173) in your browser.
 ## How It Works
 
 1. **Upload** — Select a CSV file exported from IMDb or Letterboxd
-2. **Parse** — The app reads and normalizes the CSV into a list of movies
-3. **Pick** — Click "Pick a movie" to get a random one from your list
-4. **Persist** — Your list is saved in localStorage so it survives page refreshes
+2. **Enrich** — The app fetches metadata for each movie from TMDb (rating, genres, runtime, poster, overview)
+3. **Filter** — Narrow your list by rating, runtime, release year, genre, or date added
+4. **Pick** — Click "Pick a film" to get a random movie from your filtered list
+5. **Deck mode** — Optionally queue multiple picks and run a shuffle to crown a winner
+6. **Persist** — Your enriched list is saved in localStorage so it survives page refreshes
 
 To load a new list, simply upload a new CSV — it replaces the previous one.
