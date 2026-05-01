@@ -92,6 +92,16 @@ const MovieCard: React.FC<Props> = ({ movie, compact = false }) => {
           borderRadius: '12px',
           border: '1px solid var(--color-border)',
           background: 'var(--color-surface)',
+          transition: 'border-color 0.15s ease, box-shadow 0.15s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = 'var(--color-accent)';
+          e.currentTarget.style.boxShadow =
+            '0 0 0 1px var(--color-accent), 0 0 16px rgba(255,128,0,0.15)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = 'var(--color-border)';
+          e.currentTarget.style.boxShadow = 'none';
         }}
       >
         {/* Compact poster */}

@@ -67,8 +67,8 @@ const PosterCard: React.FC<{
     borderColor = 'rgba(255,128,0,0.45)';
     glow = '0 4px 16px rgba(0,0,0,0.4)';
   } else if (isHovered) {
-    borderColor = 'var(--color-border-light)';
-    glow = '0 6px 20px rgba(0,0,0,0.4)';
+    borderColor = 'var(--color-accent)';
+    glow = '0 0 16px rgba(255,128,0,0.25), 0 6px 20px rgba(0,0,0,0.4)';
   }
 
   // Winner card: no info overlay — title/year are shown below the fan instead.
@@ -511,7 +511,7 @@ const MovieDeck: React.FC<Props> = ({
                   fontWeight: 500,
                 }}
               >
-                Press the button above to add some!
+                Click the button above to add some!
               </p>
             </div>
           )}
