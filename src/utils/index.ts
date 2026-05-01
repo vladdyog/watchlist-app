@@ -72,10 +72,20 @@ export function filterMovies(
     )
       return false;
 
+    // Include filter: movie must have at least one of the included genres
     if (filters.genres && filters.genres.length > 0) {
       const movieGenres = movie.genres ?? [];
       const hasGenre = filters.genres.some((g) => movieGenres.includes(g));
       if (!hasGenre) return false;
+    }
+
+    // Exclude filter: movie must have none of the excluded genres
+    if (filters.excludedGenres && filters.excludedGenres.length > 0) {
+      const movieGenres = movie.genres ?? [];
+      const hasExcludedGenre = filters.excludedGenres.some((g) =>
+        movieGenres.includes(g),
+      );
+      if (hasExcludedGenre) return false;
     }
 
     if (filters.addedAfter && movie.dateAdded) {

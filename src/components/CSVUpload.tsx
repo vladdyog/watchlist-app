@@ -29,13 +29,11 @@ const CSVUpload: React.FC<Props> = ({
   onError,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const [fileName, setFileName] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const processFile = async (file: File) => {
     if (!file.name.endsWith('.csv')) { onError('Please upload a .csv file.'); return; }
-    setFileName(file.name);
     setIsParsing(true);
     const result = await parseCSV(file);
     setIsParsing(false);
@@ -56,7 +54,6 @@ const CSVUpload: React.FC<Props> = ({
     const file = e.dataTransfer.files?.[0];
     if (file) processFile(file);
   };
-
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = (e: React.DragEvent) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragging(false);
@@ -64,7 +61,7 @@ const CSVUpload: React.FC<Props> = ({
 
   const cardStyle: React.CSSProperties = {
     borderRadius: '12px',
-    border: `1px solid var(--color-border)`,
+    border: '1px solid var(--color-border)',
     background: 'var(--color-surface)',
   };
 
@@ -77,7 +74,7 @@ const CSVUpload: React.FC<Props> = ({
           <path fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
         </svg>
         <div>
-          <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--color-text)' }}>Reading {fileName}…</p>
+          <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--color-text)' }}>Reading your file…</p>
           <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '2px' }}>Parsing your watchlist</p>
         </div>
       </div>
@@ -96,24 +93,19 @@ const CSVUpload: React.FC<Props> = ({
             {progress.completed} / {progress.total}
           </p>
         </div>
-
-        {/* Progress bar */}
         <div style={{ height: '6px', borderRadius: '3px', background: 'var(--color-border)', overflow: 'hidden' }}>
           <div style={{
-            height: '100%',
-            width: `${pct}%`,
-            borderRadius: '3px',
+            height: '100%', width: `${pct}%`, borderRadius: '3px',
             background: 'linear-gradient(to right, var(--color-accent), var(--color-accent-hover))',
             transition: 'width 0.3s ease',
           }} />
         </div>
-
         <p style={{ fontSize: '0.8rem', color: 'var(--color-muted)', marginTop: '8px', fontWeight: 600 }}>{pct}% complete</p>
       </div>
     );
   }
 
-  // Loaded
+  // Loaded — always "Watchlist loaded", no filename
   if (movieCount > 0) {
     return (
       <div
@@ -130,27 +122,30 @@ const CSVUpload: React.FC<Props> = ({
           cursor: 'pointer',
           transition: 'border-color 0.15s',
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--color-accent)')}
-        onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--color-border)')}
+
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <div style={{
-            width: '36px', height: '36px', borderRadius: '50%',
+            width: 36, height: 36, borderRadius: '50%',
             background: 'rgba(255,128,0,0.12)',
             border: '1px solid rgba(255,128,0,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1rem', color: 'var(--color-accent)',
+            color: 'var(--color-accent)', fontSize: '1rem', flexShrink: 0,
           }}>✓</div>
           <div>
             <p style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--color-text)' }}>
-              {fileName ?? 'Watchlist loaded'}
+              Watchlist loaded
             </p>
             <p style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '2px', fontWeight: 500 }}>
               {movieCount} films{enrichmentTime != null ? ` · enriched in ${enrichmentTime.toFixed(1)}s` : ''}
             </p>
           </div>
         </div>
-        <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 600 }}>Click to replace</span>
+
+        <span style={{ fontSize: '0.8rem', color: 'var(--color-muted)', fontWeight: 600, flexShrink: 0 }}>
+          Click to replace
+        </span>
+
         <input ref={inputRef} type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
       </div>
     );
@@ -170,14 +165,13 @@ const CSVUpload: React.FC<Props> = ({
         padding: '48px 24px',
         textAlign: 'center',
         cursor: 'pointer',
-        transition: 'all 0.2s ease',
+        transition: 'border-color 0.2s ease, background-color 0.2s ease',
       }}
       onMouseEnter={(e) => { if (!isDragging) e.currentTarget.style.borderColor = 'var(--color-border-light)'; }}
       onMouseLeave={(e) => { if (!isDragging) e.currentTarget.style.borderColor = 'var(--color-border)'; }}
     >
       <div style={{
-        fontSize: '2.5rem',
-        marginBottom: '16px',
+        fontSize: '2.5rem', marginBottom: '16px',
         filter: isDragging ? 'none' : 'grayscale(1)',
         opacity: isDragging ? 1 : 0.5,
         transform: isDragging ? 'scale(1.1)' : 'scale(1)',

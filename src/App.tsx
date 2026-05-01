@@ -172,7 +172,7 @@ const App: React.FC = () => {
 
               {/* Deck mode last pick — centered */}
               {deckEnabled && lastPick && !shuffleActive && (
-                <div style={{ marginTop: '40px', textAlign: 'center' }}>
+                <div style={{ marginTop: '40px' }}>
                   <SectionLabel>Tonight's Pick</SectionLabel>
                   <div
                     style={{ maxWidth: '420px', margin: '0 auto', cursor: 'pointer' }}
@@ -224,7 +224,7 @@ const SectionLabel: React.FC<{ children: React.ReactNode; noMargin?: boolean }> 
   </h2>
 );
 
-/* Deck mode toggle — pill with animated knob */
+/* Deck mode toggle — knob + label only, no surrounding border or background */
 const DeckToggle: React.FC<{ enabled: boolean; onToggle: () => void }> = ({ enabled, onToggle }) => (
   <button
     onClick={onToggle}
@@ -232,10 +232,9 @@ const DeckToggle: React.FC<{ enabled: boolean; onToggle: () => void }> = ({ enab
       display: 'inline-flex',
       alignItems: 'center',
       gap: '9px',
-      padding: '7px 14px 7px 10px',
-      borderRadius: '20px',
-      border: `1px solid ${enabled ? 'var(--color-accent)' : 'var(--color-border)'}`,
-      background: enabled ? 'rgba(255,128,0,0.1)' : 'transparent',
+      padding: '4px 0',
+      border: 'none',
+      background: 'transparent',
       color: enabled ? 'var(--color-accent)' : 'var(--color-muted)',
       fontSize: '0.8rem',
       fontWeight: 700,
@@ -243,7 +242,7 @@ const DeckToggle: React.FC<{ enabled: boolean; onToggle: () => void }> = ({ enab
       cursor: 'pointer',
       letterSpacing: '0.05em',
       textTransform: 'uppercase',
-      transition: 'all 0.18s ease',
+      transition: 'color 0.18s ease',
       userSelect: 'none',
     }}
   >

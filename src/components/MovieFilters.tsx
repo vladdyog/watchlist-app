@@ -2,15 +2,52 @@ import React from 'react';
 
 import type { FilterOptions, Movie } from '../types';
 
+// Extend FilterOptions locally to support excludedGenres.
+// Also update your types.ts to add `excludedGenres?: string[]`
+// and update filterMovies() to filter out movies whose genres intersect excludedGenres.
+type ExtendedFilters = FilterOptions & { excludedGenres?: string[] };
+
 type Props = {
   movies: Movie[];
-  filters: FilterOptions;
-  onChange: (filters: FilterOptions) => void;
+  filters: ExtendedFilters;
+  onChange: (filters: ExtendedFilters) => void;
 };
 
 function getUniqueGenres(movies: Movie[]): string[] {
   return Array.from(new Set(movies.flatMap((m) => m.genres ?? []))).sort();
 }
+
+type GenreState = 'neutral' | 'include' | 'exclude';
+
+function nextState(current: GenreState): GenreState {
+  if (current === 'neutral') return 'include';
+  if (current === 'include') return 'exclude';
+  return 'neutral';
+}
+
+// Only transition color-related properties — never layout — to avoid size-change jank on reset
+const COLOR_TRANSITION = 'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease';
+
+const pillStyle = (state: GenreState): React.CSSProperties => {
+  if (state === 'include') return {
+    background: 'rgba(64,188,244,0.12)',
+    borderColor: 'rgba(64,188,244,0.55)',
+    color: '#40BCF4',
+    fontWeight: 700,
+  };
+  if (state === 'exclude') return {
+    background: 'rgba(229,83,83,0.12)',
+    borderColor: 'rgba(229,83,83,0.55)',
+    color: 'var(--color-danger)',
+    fontWeight: 700,
+  };
+  return {
+    background: 'var(--color-surface-2)',
+    borderColor: 'var(--color-border-light)',
+    color: 'var(--color-text-secondary)',
+    fontWeight: 500,
+  };
+};
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -58,15 +95,29 @@ const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
   const genres = getUniqueGenres(movies);
-  const set = (partial: Partial<FilterOptions>) => onChange({ ...filters, ...partial });
 
-  const toggleGenre = (genre: string) => {
-    const current = filters.genres ?? [];
-    set({ genres: current.includes(genre) ? current.filter((g) => g !== genre) : [...current, genre] });
+  const set = (partial: Partial<ExtendedFilters>) => onChange({ ...filters, ...partial });
+
+  const getGenreState = (genre: string): GenreState => {
+    if ((filters.genres ?? []).includes(genre)) return 'include';
+    if ((filters.excludedGenres ?? []).includes(genre)) return 'exclude';
+    return 'neutral';
   };
 
-  const isActive = Object.values(filters).some((v) =>
-    Array.isArray(v) ? v.length > 0 : v !== undefined,
+  const cycleGenre = (genre: string) => {
+    const current = getGenreState(genre);
+    const next = nextState(current);
+    const included = (filters.genres ?? []).filter((g) => g !== genre);
+    const excluded = (filters.excludedGenres ?? []).filter((g) => g !== genre);
+    if (next === 'include') set({ genres: [...included, genre], excludedGenres: excluded });
+    else if (next === 'exclude') set({ genres: included, excludedGenres: [...excluded, genre] });
+    else set({ genres: included, excludedGenres: excluded });
+  };
+
+  const isActive = Object.entries(filters).some(([k, v]) =>
+    k !== 'excludedGenres'
+      ? (Array.isArray(v) ? v.length > 0 : v !== undefined)
+      : (v as string[] | undefined ?? []).length > 0,
   );
 
   return (
@@ -112,43 +163,39 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
         </div>
       </div>
 
-      {/* Genre pills — single color, clear active state */}
+      {/* Genre pills — tri-state, color-only transitions (no layout shift on reset) */}
       {genres.length > 0 && (
         <div>
-          <FieldLabel>Genres</FieldLabel>
+          <FieldLabel>
+            Genres
+            <span style={{ marginLeft: 8, fontWeight: 400, letterSpacing: 0, textTransform: 'none', color: 'var(--color-muted)', fontSize: '0.7rem' }}>
+              click to include · click again to exclude · click once more to reset
+            </span>
+          </FieldLabel>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {genres.map((genre) => {
-              const active = (filters.genres ?? []).includes(genre);
+              const state = getGenreState(genre);
+              const ps = pillStyle(state);
               return (
                 <button
                   key={genre}
-                  onClick={() => toggleGenre(genre)}
+                  onClick={() => cycleGenre(genre)}
                   style={{
+                    // Fixed padding — never changes between states, preventing layout shift
                     padding: '6px 14px',
                     borderRadius: '20px',
-                    border: `1px solid ${active ? 'var(--color-accent)' : 'var(--color-border-light)'}`,
-                    background: active ? 'rgba(255,128,0,0.12)' : 'var(--color-surface-2)',
-                    color: active ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                    border: `1px solid ${ps.borderColor}`,
+                    background: ps.background as string,
+                    color: ps.color as string,
                     fontSize: '0.825rem',
-                    fontWeight: active ? 700 : 500,
+                    fontWeight: ps.fontWeight,
                     cursor: 'pointer',
-                    transition: 'all 0.15s ease',
+                    // Only transition color properties, never layout
+                    transition: COLOR_TRANSITION,
                     fontFamily: 'var(--font-body)',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.borderColor = 'var(--color-text-secondary)';
-                      e.currentTarget.style.color = 'var(--color-text)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) {
-                      e.currentTarget.style.borderColor = 'var(--color-border-light)';
-                      e.currentTarget.style.color = 'var(--color-text-secondary)';
-                    }
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  {active && <span style={{fontSize: '0.75rem' }}></span>}
                   {genre}
                 </button>
               );
@@ -172,7 +219,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
               fontWeight: 600,
               cursor: 'pointer',
               fontFamily: 'var(--font-body)',
-              transition: 'all 0.15s',
+              transition: COLOR_TRANSITION,
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = 'var(--color-accent)';
