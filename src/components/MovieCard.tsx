@@ -7,93 +7,173 @@ type Props = {
   compact?: boolean;
 };
 
-const PLACEHOLDER = (
-  <div className="w-full h-full flex items-center justify-center bg-surface-elevated text-muted text-5xl">
+const PosterPlaceholder = ({ size }: { size: 'sm' | 'lg' }) => (
+  <div
+    style={{
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, var(--color-surface-2) 0%, var(--color-border) 100%)',
+      fontSize: size === 'lg' ? '3rem' : '1.8rem',
+      opacity: 0.3,
+    }}
+  >
     🎬
   </div>
 );
 
-const MovieCard: React.FC<Props> = ({ movie, compact = false }) => {
+const RatingBadge: React.FC<{ rating: number }> = ({ rating }) => (
+  <span style={{
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '3px',
+    color: 'var(--color-green)',
+    fontWeight: 700,
+    fontSize: '0.875rem',
+  }}>
+    ★ {rating.toFixed(1)}
+  </span>
+);
+
+const GenrePill: React.FC<{ label: string; index: number }> = ({ label, index }) => {
+  // Cycle through accent colors for visual interest
+  const colors = [
+    { bg: 'rgba(255,128,0,0.12)', border: 'rgba(255,128,0,0.35)', text: '#FF8000' },
+    { bg: 'rgba(64,188,244,0.12)', border: 'rgba(64,188,244,0.35)', text: '#40BCF4' },
+    { bg: 'rgba(0,224,84,0.10)', border: 'rgba(0,224,84,0.3)', text: '#00E054' },
+  ];
+  const c = colors[index % colors.length];
   return (
-    <div
-      className={`
-        group
-        bg-surface/95
-        border border-border/70
-        rounded-2xl
-        overflow-hidden
-        shadow-[0_12px_40px_rgba(0,0,0,0.35)]
-        hover:border-accent/30
-        hover:-translate-y-1
-        transition-all duration-300
-        backdrop-blur-sm
-        ${compact ? 'flex gap-5 p-5 items-start' : 'flex flex-col'}
-      `}
-    >
-      <div
-        className={`
-          overflow-hidden flex-shrink-0 bg-surface-elevated
-          ${compact ? 'w-20 h-28 rounded-xl' : 'w-full aspect-[2/3]'}
-        `}
-      >
-        {movie.poster ? (
-          <img
-            src={movie.poster}
-            alt={movie.title}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-        ) : (
-          PLACEHOLDER
-        )}
+    <span style={{
+      fontSize: '0.75rem',
+      fontWeight: 600,
+      padding: '3px 10px',
+      borderRadius: '20px',
+      background: c.bg,
+      border: `1px solid ${c.border}`,
+      color: c.text,
+      letterSpacing: '0.02em',
+    }}>
+      {label}
+    </span>
+  );
+};
+
+const MovieCard: React.FC<Props> = ({ movie, compact = false }) => {
+  if (compact) {
+    return (
+      <div style={{
+        display: 'flex',
+        gap: '16px',
+        padding: '14px',
+        borderRadius: '12px',
+        border: '1px solid var(--color-border)',
+        background: 'var(--color-surface)',
+      }}>
+        {/* Compact poster */}
+        <div style={{
+          flexShrink: 0,
+          width: '56px',
+          height: '80px',
+          borderRadius: '8px',
+          overflow: 'hidden',
+          border: '1px solid var(--color-border)',
+        }}>
+          {movie.poster
+            ? <img src={movie.poster} alt={movie.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <PosterPlaceholder size="sm" />
+          }
+        </div>
+
+        {/* Info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0, justifyContent: 'center' }}>
+          <p style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--color-text)', lineHeight: 1.3 }}>
+            {movie.title}
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            {movie.year && (
+              <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
+                {movie.year}
+              </span>
+            )}
+            {movie.runtime && (
+              <span style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', fontWeight: 500 }}>
+                {movie.runtime} min
+              </span>
+            )}
+            {movie.rating && <RatingBadge rating={movie.rating} />}
+          </div>
+          {movie.genres && movie.genres.length > 0 && (
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {movie.genres.slice(0, 2).map((g, i) => <GenrePill key={g} label={g} index={i} />)}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      borderRadius: '14px',
+      border: '1px solid var(--color-border)',
+      background: 'var(--color-surface)',
+      overflow: 'hidden',
+    }}>
+      {/* Poster */}
+      <div style={{ position: 'relative', aspectRatio: '2/3', overflow: 'hidden' }}>
+        {movie.poster
+          ? (
+            <>
+              <img src={movie.poster} alt={movie.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <div style={{
+                position: 'absolute',
+                bottom: 0, left: 0, right: 0,
+                height: '40%',
+                background: 'linear-gradient(to top, var(--color-surface) 0%, transparent 100%)',
+              }} />
+            </>
+          )
+          : <PosterPlaceholder size="lg" />
+        }
       </div>
 
-      <div className={`${compact ? 'flex-1 min-w-0' : 'p-6'} flex flex-col`}>
-        <h3
-          className={`
-            font-display
-            font-bold
-            tracking-tight
-            leading-tight
-            text-white
-            ${compact ? 'text-xl' : 'text-3xl'}
-          `}
-        >
+      {/* Info */}
+      <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <p style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-text)', lineHeight: 1.25, letterSpacing: '-0.01em' }}>
           {movie.title}
-        </h3>
-
-        <p className="text-muted text-sm font-medium mt-3">
-          {[
-            movie.year,
-            movie.runtime && `${movie.runtime} min`,
-            movie.rating && `★ ${movie.rating.toFixed(1)}`,
-          ]
-            .filter(Boolean)
-            .join(' · ')}
         </p>
 
+        {/* Meta row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          {movie.year && (
+            <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+              {movie.year}
+            </span>
+          )}
+          {movie.runtime && (
+            <span style={{
+              fontSize: '0.85rem', fontWeight: 500, color: 'var(--color-text-secondary)',
+              paddingLeft: movie.year ? '0' : '0',
+            }}>
+              {movie.runtime} min
+            </span>
+          )}
+          {movie.rating && <RatingBadge rating={movie.rating} />}
+        </div>
+
+        {/* Genre pills */}
         {movie.genres && movie.genres.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {movie.genres.map((genre) => (
-              <span
-                key={genre}
-                className="
-                  text-xs
-                  px-3 py-1
-                  rounded-full
-                  bg-white/5
-                  border border-white/8
-                  text-muted
-                  backdrop-blur-sm
-                "
-              >
-                {genre}
-              </span>
-            ))}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {movie.genres.map((g, i) => <GenrePill key={g} label={g} index={i} />)}
           </div>
         )}
 
-        {!compact && movie.overview && (
-          <p className="text-muted text-[15px] leading-7 mt-6">
+        {/* Overview */}
+        {movie.overview && (
+          <p style={{ fontSize: '0.9rem', lineHeight: 1.65, color: 'var(--color-text-secondary)', fontWeight: 400, marginTop: '4px' }}>
             {movie.overview}
           </p>
         )}
