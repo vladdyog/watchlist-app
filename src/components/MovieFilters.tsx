@@ -85,7 +85,10 @@ const StyledInput: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (
   />
 );
 
-const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const FieldLabel: React.FC<{
+  children: React.ReactNode;
+  noMargin?: boolean;
+}> = ({ children, noMargin }) => (
   <p
     style={{
       fontSize: '0.75rem',
@@ -93,7 +96,7 @@ const FieldLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
       color: 'var(--color-text-secondary)',
-      marginBottom: '8px',
+      marginBottom: noMargin ? 0 : '8px',
     }}
   >
     {children}
@@ -215,23 +218,52 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
       {/* Genre pills — tri-state, color-only transitions (no layout shift on reset) */}
       {genres.length > 0 && (
         <div>
-          <FieldLabel>
-            Genres
-            <span
-              style={{
-                marginLeft: 8,
-                fontWeight: 400,
-                letterSpacing: 0,
-                textTransform: 'none',
-                color: 'var(--color-muted)',
-                fontSize: '0.7rem',
-              }}
-            >
-              click to include · click again to exclude · click once more to
-              reset
-            </span>
-          </FieldLabel>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '8px',
+            }}
+          >
+            <FieldLabel noMargin>Genres</FieldLabel>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {(['include', 'exclude'] as GenreState[]).map((state) => {
+                const ps = pillStyle(state);
+                return (
+                  <span
+                    key={state}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      fontSize: '0.71rem',
+                      color: ps.color as string,
+                      fontWeight: 600,
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        width: 7,
+                        height: 7,
+                        borderRadius: '50%',
+                        background: ps.color as string,
+                      }}
+                    />
+                    {state.charAt(0).toUpperCase() + state.slice(1)}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
+              gap: '8px',
+            }}
+          >
             {genres.map((genre) => {
               const state = getGenreState(genre);
               const ps = pillStyle(state);
@@ -240,8 +272,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
                   key={genre}
                   onClick={() => cycleGenre(genre)}
                   style={{
-                    // Fixed padding — never changes between states, preventing layout shift
-                    padding: '6px 14px',
+                    padding: '7px 8px',
                     borderRadius: '20px',
                     border: `1px solid ${ps.borderColor}`,
                     background: ps.background as string,
@@ -249,9 +280,12 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
                     fontSize: '0.825rem',
                     fontWeight: ps.fontWeight,
                     cursor: 'pointer',
-                    // Only transition color properties, never layout
                     transition: COLOR_TRANSITION,
                     fontFamily: 'var(--font-body)',
+                    width: '100%',
+                    textAlign: 'center',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
                   }}
                 >
