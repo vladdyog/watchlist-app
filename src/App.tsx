@@ -253,7 +253,7 @@ const App: React.FC = () => {
 
               {/* Deck mode last pick — centered */}
               {deckEnabled && lastPick && !shuffleActive && (
-                <div style={{ marginTop: '40px' }}>
+                <div style={{ marginTop: '40px', textAlign: 'center' }}>
                   <SectionLabel>Tonight's Pick</SectionLabel>
                   <div
                     style={{
