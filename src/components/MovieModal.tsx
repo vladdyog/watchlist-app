@@ -11,7 +11,9 @@ type Props = {
 
 const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [onClose]);
@@ -20,12 +22,22 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
     <AnimatePresence>
       <motion.div
         style={{
-          position: 'fixed', inset: 0, zIndex: 50,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'fixed',
+          inset: 0,
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           padding: '16px',
         }}
-        initial={{ backgroundColor: 'rgba(0,0,0,0)', backdropFilter: 'blur(0px)' }}
-        animate={{ backgroundColor: 'rgba(10,12,16,0.88)', backdropFilter: 'blur(10px)' }}
+        initial={{
+          backgroundColor: 'rgba(0,0,0,0)',
+          backdropFilter: 'blur(0px)',
+        }}
+        animate={{
+          backgroundColor: 'rgba(10,12,16,0.88)',
+          backdropFilter: 'blur(10px)',
+        }}
         exit={{ backgroundColor: 'rgba(0,0,0,0)', backdropFilter: 'blur(0px)' }}
         transition={{ duration: 0.2 }}
         onClick={onClose}
@@ -87,23 +99,31 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
           </div>
 
           {/* Hint */}
-          <p style={{
-            textAlign: 'center',
-            fontSize: '0.78rem',
-            color: 'var(--color-muted)',
-            marginTop: '14px',
-            fontWeight: 500,
-            flexShrink: 0,
-          }}>
-            Press <kbd style={{
-              padding: '2px 7px',
-              background: 'var(--color-surface-2)',
-              border: '1px solid var(--color-border-light)',
-              borderRadius: '5px',
-              fontSize: '0.75rem',
-              color: 'var(--color-text-secondary)',
-              fontFamily: 'var(--font-body)',
-            }}>Esc</kbd> or click outside to close
+          <p
+            style={{
+              textAlign: 'center',
+              fontSize: '0.78rem',
+              color: 'var(--color-muted)',
+              marginTop: '14px',
+              fontWeight: 500,
+              flexShrink: 0,
+            }}
+          >
+            Press{' '}
+            <kbd
+              style={{
+                padding: '2px 7px',
+                background: 'var(--color-surface-2)',
+                border: '1px solid var(--color-border-light)',
+                borderRadius: '5px',
+                fontSize: '0.75rem',
+                color: 'var(--color-text-secondary)',
+                fontFamily: 'var(--font-body)',
+              }}
+            >
+              Esc
+            </kbd>{' '}
+            or click outside to close
           </p>
         </motion.div>
       </motion.div>

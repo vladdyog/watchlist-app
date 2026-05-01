@@ -30,16 +30,40 @@ const MoviePicker: React.FC<Props> = ({
   };
 
   const isEmpty = movies.length === 0;
-  const label = deckEnabled ? '+ Add to Deck' : lastPick ? 'Pick Again' : 'Pick a Film';
+  const label = deckEnabled
+    ? '+ Add to Deck'
+    : lastPick
+      ? 'Pick Again'
+      : 'Pick a Film';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '32px' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '32px',
+      }}
+    >
       {isEmpty ? (
         <div style={{ textAlign: 'center', padding: '24px 0' }}>
-          <p style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>
+          <p
+            style={{
+              fontSize: '0.95rem',
+              fontWeight: 600,
+              color: 'var(--color-text-secondary)',
+            }}
+          >
             No films match your filters
           </p>
-          <p style={{ fontSize: '0.85rem', color: 'var(--color-muted)', marginTop: '4px', fontWeight: 500 }}>
+          <p
+            style={{
+              fontSize: '0.85rem',
+              color: 'var(--color-muted)',
+              marginTop: '4px',
+              fontWeight: 500,
+            }}
+          >
             Try adjusting or resetting the filters above
           </p>
         </div>
@@ -63,7 +87,9 @@ const MoviePicker: React.FC<Props> = ({
               fontFamily: 'var(--font-body)',
               cursor: 'pointer',
               letterSpacing: '-0.01em',
-              boxShadow: deckEnabled ? 'none' : '0 0 40px rgba(255,128,0,0.3), 0 8px 24px rgba(255,128,0,0.2)',
+              boxShadow: deckEnabled
+                ? 'none'
+                : '0 0 40px rgba(255,128,0,0.3), 0 8px 24px rgba(255,128,0,0.2)',
             }}
           >
             {label}
@@ -89,19 +115,57 @@ const MoviePicker: React.FC<Props> = ({
               transition={{ duration: 0.25, ease: 'easeOut' }}
             >
               {/* Label */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
-                <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
-                <p style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--color-accent)' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '14px',
+                }}
+              >
+                <div
+                  style={{
+                    flex: 1,
+                    height: '1px',
+                    background: 'var(--color-border)',
+                  }}
+                />
+                <p
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: 'var(--color-accent)',
+                  }}
+                >
                   Tonight's Pick
                 </p>
-                <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+                <div
+                  style={{
+                    flex: 1,
+                    height: '1px',
+                    background: 'var(--color-border)',
+                  }}
+                />
               </div>
 
-              <div style={{ cursor: 'pointer' }} onClick={() => setShowModal(true)}>
+              <div
+                style={{ cursor: 'pointer' }}
+                onClick={() => setShowModal(true)}
+              >
                 <MovieCard movie={lastPick} compact />
               </div>
 
-              <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-muted)', marginTop: '10px', fontWeight: 500 }}>
+              <p
+                style={{
+                  textAlign: 'center',
+                  fontSize: '0.8rem',
+                  color: 'var(--color-muted)',
+                  marginTop: '10px',
+                  fontWeight: 500,
+                }}
+              >
                 Click to expand
               </p>
             </motion.div>
