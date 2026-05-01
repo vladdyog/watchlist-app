@@ -334,7 +334,9 @@ const CSVUpload: React.FC<Props> = ({
           marginBottom: '6px',
         }}
       >
-        {isDragging ? 'Drop your CSV here' : 'Drop your watchlist CSV here'}
+        {isDragging
+          ? 'Drop your watchlist CSV here'
+          : 'Drop your watchlist CSV here'}
       </p>
       <p
         style={{

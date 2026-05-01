@@ -31,7 +31,7 @@ const MoviePicker: React.FC<Props> = ({
 
   const isEmpty = movies.length === 0;
   const label = deckEnabled
-    ? '+ Add to Deck'
+    ? 'Add to Deck'
     : lastPick
       ? 'Pick Again'
       : 'Pick a Film';

@@ -251,14 +251,57 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              {/* Deck mode last pick — centered */}
+              {/* Deck mode last pick — same layout as normal mode */}
               {deckEnabled && lastPick && !shuffleActive && (
-                <div style={{ marginTop: '40px', textAlign: 'center' }}>
-                  <SectionLabel>Tonight's Pick</SectionLabel>
+                <div
+                  style={{
+                    marginTop: '32px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '0',
+                  }}
+                >
                   <div
                     style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      marginBottom: '14px',
+                      width: '100%',
                       maxWidth: '420px',
-                      margin: '0 auto',
+                    }}
+                  >
+                    <div
+                      style={{
+                        flex: 1,
+                        height: '1px',
+                        background: 'var(--color-border)',
+                      }}
+                    />
+                    <p
+                      style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: 'var(--color-accent)',
+                      }}
+                    >
+                      Tonight's Pick
+                    </p>
+                    <div
+                      style={{
+                        flex: 1,
+                        height: '1px',
+                        background: 'var(--color-border)',
+                      }}
+                    />
+                  </div>
+                  <div
+                    style={{
+                      width: '100%',
+                      maxWidth: '420px',
                       cursor: 'pointer',
                     }}
                     onClick={() => setShowDeckWinnerModal(true)}
