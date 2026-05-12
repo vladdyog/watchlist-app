@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import type { Movie } from '../types';
 import { normalizeMovies, parseCSV } from '../utils';
@@ -185,6 +185,33 @@ const CSVUpload: React.FC<Props> = ({
   const [isParsing, setIsParsing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Smooth progress — RAF loop that chases the real value each frame.
+  // Each tick moves 10% of the remaining gap, so it naturally eases in on
+  // big batch jumps and coasts fluidly between them instead of stalling.
+  const [smoothPct, setSmoothPct] = useState(0);
+  const targetPctRef = useRef(0);
+
+  useEffect(() => {
+    targetPctRef.current = progress
+      ? (progress.completed / progress.total) * 100
+      : 0;
+  }, [progress]);
+
+  useEffect(() => {
+    let raf: number;
+    const tick = () => {
+      setSmoothPct((prev) => {
+        const target = targetPctRef.current;
+        const delta = target - prev;
+        if (Math.abs(delta) < 0.05) return target;
+        return prev + delta * 0.1;
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   const processFile = async (file: File) => {
     if (!file.name.endsWith('.csv')) {
       onError('Please upload a .csv file.');
@@ -290,7 +317,6 @@ const CSVUpload: React.FC<Props> = ({
 
   // Enriching
   if (isEnriching && progress) {
-    const pct = Math.round((progress.completed / progress.total) * 100);
     const msg = ENRICHING_MESSAGES[progress.total % ENRICHING_MESSAGES.length];
     return (
       <div style={{ ...cardStyle, padding: '20px' }}>
@@ -334,11 +360,10 @@ const CSVUpload: React.FC<Props> = ({
           <div
             style={{
               height: '100%',
-              width: `${pct}%`,
+              width: `${smoothPct}%`,
               borderRadius: '3px',
               background:
                 'linear-gradient(to right, var(--color-accent), var(--color-accent-hover))',
-              transition: 'width 0.3s ease',
             }}
           />
         </div>
@@ -350,7 +375,7 @@ const CSVUpload: React.FC<Props> = ({
             fontWeight: 600,
           }}
         >
-          {pct}% complete
+          {Math.round(smoothPct)}% complete
         </p>
       </div>
     );
@@ -485,9 +510,7 @@ const CSVUpload: React.FC<Props> = ({
             marginBottom: '6px',
           }}
         >
-          {isDragging
-            ? 'Drop your watchlist CSV here'
-            : 'Drop your watchlist CSV here'}
+          Drop your watchlist CSV here
         </p>
         <p
           style={{
