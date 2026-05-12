@@ -15,7 +15,7 @@ const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 // async callers.
 // ---------------------------------------------------------------------------
 const RATE_WINDOW_MS = 1_000;
-const MAX_REQUESTS_PER_WINDOW = 45; // Pushing the limit, but staying on the safe side with sub-50 requests
+const MAX_REQUESTS_PER_WINDOW = 40; // Pushing the limit, but staying on the safe side with sub-50 requests
 const requestTimestamps: number[] = [];
 
 async function waitForRateLimit(): Promise<void> {
