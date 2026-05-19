@@ -189,8 +189,8 @@ const TmdbAttribution: React.FC = () => {
                     fontWeight: 600,
                   }}
                 >
-                  This website uses the The Movie Database (TMDB) API but is not endorsed or
-                  certified by TMDB.
+                  This website uses the The Movie Database (TMDB) API but is not
+                  endorsed or certified by TMDB.
                 </p>
 
                 <p
@@ -201,7 +201,8 @@ const TmdbAttribution: React.FC = () => {
                     fontWeight: 400,
                   }}
                 >
-                  All additional movie metadata, posters, and ratings are provided by{' '}
+                  All additional movie metadata, posters, and ratings are
+                  provided by{' '}
                   <a
                     href="https://www.themoviedb.org"
                     target="_blank"

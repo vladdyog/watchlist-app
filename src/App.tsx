@@ -330,8 +330,14 @@ const App: React.FC = () => {
           </>
         )}
       </main>
-      
-      <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 24px 16px' }}>
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          padding: '0 24px 16px',
+        }}
+      >
         <FeedbackButton />
       </div>
 
