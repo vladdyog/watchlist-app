@@ -2,6 +2,7 @@ import { Analytics } from '@vercel/analytics/react';
 import React, { useEffect, useState } from 'react';
 
 import CSVUpload from './components/CSVUpload';
+import FeedbackButton from './components/FeedbackButton';
 import MovieCard from './components/MovieCard';
 import MovieDeck from './components/MovieDeck';
 import MovieFilters from './components/MovieFilters';
@@ -15,7 +16,6 @@ const STORAGE_KEY = 'watchlist';
 const DECK_KEY = 'deck';
 const DECK_ENABLED_KEY = 'deckEnabled';
 const APP_VERSION = import.meta.env.PACKAGE_VERSION;
-const AUTHOR = import.meta.env.AUTHOR;
 
 function loadFromStorage<T>(key: string): T | null {
   try {
@@ -334,8 +334,10 @@ const App: React.FC = () => {
       <footer
         style={{
           borderTop: '1px solid var(--color-border)',
-          padding: '24px',
-          textAlign: 'center',
+          padding: '20px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
         <p
@@ -345,20 +347,9 @@ const App: React.FC = () => {
             fontWeight: 500,
           }}
         >
-          CueMovie · v{APP_VERSION} · © 2026 {AUTHOR}
+          © 2026 CueMovie · v{APP_VERSION}
         </p>
-        <a
-          href="https://www.flaticon.com/free-icons/clapper"
-          style={{
-            fontSize: '0.75rem',
-            color: 'var(--color-muted)',
-            textDecoration: 'none',
-            marginTop: '4px',
-            display: 'block',
-          }}
-        >
-          Icons by Uniconlabs / Flaticon
-        </a>
+        <FeedbackButton />
       </footer>
     </div>
   );
