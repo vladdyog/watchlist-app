@@ -38,8 +38,10 @@ async function waitForRateLimit(): Promise<void> {
 // ---------------------------------------------------------------------------
 // Rate-limited fetch with 429 retry
 //
-// Calls go through /api/tmdbFunction (a server-side proxy) so the TMDB bearer token
-// is never sent from or stored in the browser.
+// In development, requests to /api/tmdbFunction are intercepted by Vite's
+// proxy (configured in vite.config.ts), which forwards them to TMDB and
+// injects the Authorization header server-side — so the token never reaches
+// the browser in either environment.
 // ---------------------------------------------------------------------------
 async function tmdbFetch(
   path: string,
@@ -111,9 +113,7 @@ async function searchMovie(
   return (data.results?.[0] as TMDbSearchResult) ?? null;
 }
 
-async function fetchMovieDetails(
-  id: number,
-): Promise<TMDbMovieDetails | null> {
+async function fetchMovieDetails(id: number): Promise<TMDbMovieDetails | null> {
   const res = await tmdbFetch(`/movie/${id}`, new URLSearchParams());
   if (!res) return null;
   return res.json() as Promise<TMDbMovieDetails>;

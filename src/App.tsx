@@ -67,9 +67,8 @@ const App: React.FC = () => {
     setFilters({});
     setError(null);
     const start = performance.now();
-    const enriched = await enrichAllMovies(
-      rawMovies,
-      (completed, total) => setProgress({ completed, total }),
+    const enriched = await enrichAllMovies(rawMovies, (completed, total) =>
+      setProgress({ completed, total }),
     );
     setMovies(enriched);
     setProgress(null);
