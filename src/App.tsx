@@ -8,6 +8,7 @@ import MovieDeck from './components/MovieDeck';
 import MovieFilters from './components/MovieFilters';
 import MovieModal from './components/MovieModal';
 import MoviePicker from './components/MoviePicker';
+import TMDBAttribution from './components/TMDBAttribution';
 import type { FilterOptions, Movie } from './types';
 import { filterMovies } from './utils';
 import { enrichAllMovies } from './utils/tmdb';
@@ -330,6 +331,16 @@ const App: React.FC = () => {
         )}
       </main>
 
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'flex-end',
+          padding: '0 24px 16px',
+        }}
+      >
+        <FeedbackButton />
+      </div>
+
       {/* ── Footer ── */}
       <footer
         style={{
@@ -340,16 +351,25 @@ const App: React.FC = () => {
           justifyContent: 'space-between',
         }}
       >
-        <p
-          style={{
-            fontSize: '0.8rem',
-            color: 'var(--color-muted)',
-            fontWeight: 500,
-          }}
-        >
-          © 2026 CueMovie · v{APP_VERSION}
-        </p>
-        <FeedbackButton />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <p
+            style={{
+              fontSize: '0.8rem',
+              color: 'var(--color-muted)',
+              fontWeight: 500,
+            }}
+          >
+            © 2026 CueMovie · v{APP_VERSION}
+          </p>
+          <div
+            style={{
+              width: '1px',
+              height: '14px',
+              background: 'var(--color-border)',
+            }}
+          />
+          <TMDBAttribution />
+        </div>
       </footer>
     </div>
   );

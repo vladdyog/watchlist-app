@@ -9,7 +9,7 @@ type Status = 'idle' | 'submitting' | 'success' | 'error';
 const CATEGORIES: Category[] = ['Bug report', 'Feature idea', 'General'];
 
 const COLOR_TRANSITION =
-  'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease';
+  'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease';
 
 const inputBase: React.CSSProperties = {
   width: '100%',
@@ -346,8 +346,8 @@ const FeedbackButton: React.FC = () => {
                       <p
                         style={{
                           fontSize: '1rem',
-                          fontWeight: 800,
-                          color: 'var(--color-text)',
+                          fontWeight: 700,
+                          color: 'var(--color-accent)',
                           letterSpacing: '-0.02em',
                         }}
                       >
@@ -360,7 +360,7 @@ const FeedbackButton: React.FC = () => {
                           marginTop: '2px',
                         }}
                       >
-                        Bug, idea, or just a note — all are welcome.
+                        Bug, idea, or just a note - all are welcome.
                       </p>
                     </div>
 
@@ -413,10 +413,10 @@ const FeedbackButton: React.FC = () => {
 
                     {/* Email (optional) */}
                     <div>
-                      <Label>Email — optional</Label>
+                      <Label>Email (optional)</Label>
                       <FocusInput
                         type="email"
-                        placeholder="If you'd like a reply"
+                        placeholder="If you want a reply"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={status === 'submitting'}
@@ -432,7 +432,7 @@ const FeedbackButton: React.FC = () => {
                           fontWeight: 500,
                         }}
                       >
-                        Something went wrong — please try again.
+                        Something went wrong - please try again.
                       </p>
                     )}
 
