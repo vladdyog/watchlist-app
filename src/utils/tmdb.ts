@@ -1,6 +1,5 @@
 import type { Movie } from '../types';
 
-const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
 // ---------------------------------------------------------------------------
@@ -38,24 +37,29 @@ async function waitForRateLimit(): Promise<void> {
 
 // ---------------------------------------------------------------------------
 // Rate-limited fetch with 429 retry
+//
+// Calls go through /api/tmdbFunction (a server-side proxy) so the TMDB bearer token
+// is never sent from or stored in the browser.
 // ---------------------------------------------------------------------------
 async function tmdbFetch(
-  url: string,
-  token: string,
+  path: string,
+  query: URLSearchParams,
   retries = 3,
 ): Promise<Response | null> {
   await waitForRateLimit();
+
+  const proxyParams = new URLSearchParams({ path });
+  query.forEach((v, k) => proxyParams.set(k, v));
+
   try {
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const res = await fetch(`/api/tmdbFunction?${proxyParams}`);
     if (res.status === 429) {
       if (retries <= 0) return null;
       const raw = res.headers.get('Retry-After');
       const seconds = raw !== null ? parseFloat(raw) : NaN;
       const waitMs = isNaN(seconds) ? 2_000 : seconds * 1_000;
       await new Promise<void>((r) => setTimeout(r, waitMs));
-      return tmdbFetch(url, token, retries - 1);
+      return tmdbFetch(path, query, retries - 1);
     }
     return res.ok ? res : null;
   } catch {
@@ -92,7 +96,6 @@ export type TMDbEnrichment = {
 async function searchMovie(
   title: string,
   year: number | undefined,
-  token: string,
 ): Promise<TMDbSearchResult | null> {
   const params = new URLSearchParams({
     query: title,
@@ -102,7 +105,7 @@ async function searchMovie(
   });
   if (year) params.set('year', String(year));
 
-  const res = await tmdbFetch(`${TMDB_BASE}/search/movie?${params}`, token);
+  const res = await tmdbFetch('/search/movie', params);
   if (!res) return null;
   const data = await res.json();
   return (data.results?.[0] as TMDbSearchResult) ?? null;
@@ -110,22 +113,18 @@ async function searchMovie(
 
 async function fetchMovieDetails(
   id: number,
-  token: string,
 ): Promise<TMDbMovieDetails | null> {
-  const res = await tmdbFetch(`${TMDB_BASE}/movie/${id}`, token);
+  const res = await tmdbFetch(`/movie/${id}`, new URLSearchParams());
   if (!res) return null;
   return res.json() as Promise<TMDbMovieDetails>;
 }
 
-export async function enrichMovie(
-  movie: Movie,
-  token: string,
-): Promise<TMDbEnrichment> {
+export async function enrichMovie(movie: Movie): Promise<TMDbEnrichment> {
   try {
-    const result = await searchMovie(movie.title, movie.year, token);
+    const result = await searchMovie(movie.title, movie.year);
     if (!result) return {};
 
-    const details = await fetchMovieDetails(result.id, token);
+    const details = await fetchMovieDetails(result.id);
 
     return {
       rating: result.vote_average || undefined,
@@ -152,7 +151,6 @@ export async function enrichMovie(
 // ---------------------------------------------------------------------------
 export async function enrichAllMovies(
   movies: Movie[],
-  token: string,
   onProgress: (completed: number, total: number) => void,
   concurrency = 50,
 ): Promise<Movie[]> {
@@ -163,7 +161,7 @@ export async function enrichAllMovies(
   async function worker(): Promise<void> {
     while (nextIndex < movies.length) {
       const i = nextIndex++; // safe: JS is single-threaded, no await between read & write
-      enriched[i] = { ...movies[i], ...(await enrichMovie(movies[i], token)) };
+      enriched[i] = { ...movies[i], ...(await enrichMovie(movies[i])) };
       onProgress(++completed, movies.length);
     }
   }
