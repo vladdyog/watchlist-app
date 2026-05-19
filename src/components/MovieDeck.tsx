@@ -363,6 +363,10 @@ const MovieDeck: React.FC<Props> = ({
     }
   }, [shuffleActive]);
 
+  useEffect(() => {
+    setHoveredIndex(null);
+  }, [movies.length]);
+
   const prevShuffleRef = useRef(false);
   useEffect(() => {
     if (prevShuffleRef.current && !shuffleActive) {
