@@ -32,8 +32,8 @@ export default async function handler(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Referer': 'https://watchlist-app.vercel.app',
+        Accept: 'application/json',
+        Referer: 'https://watchlist-app.vercel.app',
       },
       body,
     });
