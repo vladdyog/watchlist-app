@@ -13,7 +13,6 @@ export default defineConfig(({ mode }) => {
     plugins: [react(), tailwindcss()],
     define: {
       'import.meta.env.PACKAGE_VERSION': JSON.stringify(packageJson.version),
-      'import.meta.env.AUTHOR': JSON.stringify(packageJson.author),
     },
     server: {
       proxy: {
@@ -31,6 +30,11 @@ export default defineConfig(({ mode }) => {
               proxyReq.setHeader('Authorization', `Bearer ${env.TMDB_TOKEN}`);
             });
           },
+        },
+        '/api/feedbackFunction': {
+          target: env.FEEDBACK_ENDPOINT,
+          changeOrigin: true,
+          rewrite: () => '',
         },
       },
     },
