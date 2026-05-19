@@ -14,7 +14,6 @@ import { enrichAllMovies } from './utils/tmdb';
 const STORAGE_KEY = 'watchlist';
 const DECK_KEY = 'deck';
 const DECK_ENABLED_KEY = 'deckEnabled';
-const TMDB_TOKEN = import.meta.env.VITE_TMDB_TOKEN as string;
 const APP_VERSION = import.meta.env.PACKAGE_VERSION;
 const AUTHOR = import.meta.env.AUTHOR;
 
@@ -68,10 +67,8 @@ const App: React.FC = () => {
     setFilters({});
     setError(null);
     const start = performance.now();
-    const enriched = await enrichAllMovies(
-      rawMovies,
-      TMDB_TOKEN,
-      (completed, total) => setProgress({ completed, total }),
+    const enriched = await enrichAllMovies(rawMovies, (completed, total) =>
+      setProgress({ completed, total }),
     );
     setMovies(enriched);
     setProgress(null);
