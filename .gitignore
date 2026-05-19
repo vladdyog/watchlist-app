@@ -13,6 +13,7 @@ dist/
 # Environment variables
 .env
 .env.local
+.env*.local
 .env.*.local
 
 # Editor
@@ -22,3 +23,4 @@ dist/
 # OS
 .DS_Store
 Thumbs.db
+.vercel
