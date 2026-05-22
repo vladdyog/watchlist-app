@@ -24,13 +24,11 @@ const HOVER_LIFT = 42;
 const CONTAINER_TOP_BUFFER = 50;
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 4);
-const getFanRotation = (i: number, total: number) =>
-  (i - (total - 1) / 2) * 2.5;
 
 const PosterCard: React.FC<{
   movie: Movie;
   index: number;
-  total: number;
+  offset: number;
   isHovered: boolean;
   isActive: boolean;
   isWinner: boolean;
@@ -44,7 +42,7 @@ const PosterCard: React.FC<{
 }> = ({
   movie,
   index,
-  total,
+  offset,
   isHovered,
   isActive,
   isWinner,
@@ -81,7 +79,7 @@ const PosterCard: React.FC<{
       style={{
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
-        left: index * CARD_OFFSET,
+        left: index * offset,
         bottom: 0,
         originX: '50%',
         originY: '100%',
@@ -91,7 +89,6 @@ const PosterCard: React.FC<{
       animate={{
         x: nudge,
         y: isLifted ? -HOVER_LIFT : 0,
-        rotate: isLifted ? 0 : getFanRotation(index, total),
         scale: isLifted ? 1.05 : 1,
       }}
       transition={{ type: 'spring', stiffness: 220, damping: 34 }}
@@ -123,7 +120,7 @@ const PosterCard: React.FC<{
           }}
         >
           <AnimatePresence>
-            {isHovered && !isShuffling && !isFlipped && (
+            {isHovered && !isShuffling && !isFlipped && !isWinner && (
               <motion.button
                 initial={{ opacity: 0, scale: 0.7 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -329,6 +326,7 @@ const MovieDeck: React.FC<Props> = ({
   const [watchAccepted, setWatchAccepted] = useState(false);
   const [modalMovie, setModalMovie] = useState<Movie | null>(null);
   const [flippedCards, setFlippedCards] = useState<Set<number>>(new Set());
+  const [viewportWidth, setViewportWidth] = useState(() => window.innerWidth);
   const animRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
@@ -362,6 +360,12 @@ const MovieDeck: React.FC<Props> = ({
       };
     }
   }, [shuffleActive]);
+
+  useEffect(() => {
+    const onResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   useEffect(() => {
     setHoveredIndex(null);
@@ -445,7 +449,16 @@ const MovieDeck: React.FC<Props> = ({
   };
 
   const cardCount = Math.max(1, movies.length);
-  const deckWidth = CARD_WIDTH + CARD_OFFSET * (cardCount - 1);
+  // 48px = 24px left + 24px right page padding
+  const availableWidth = Math.min(672, viewportWidth - 48);
+  const effectiveOffset =
+    cardCount <= 1
+      ? CARD_OFFSET
+      : Math.min(
+          CARD_OFFSET,
+          Math.floor((availableWidth - CARD_WIDTH) / (cardCount - 1)),
+        );
+  const deckWidth = CARD_WIDTH + effectiveOffset * (cardCount - 1);
   const containerHeight = CARD_HEIGHT + CONTAINER_TOP_BUFFER;
 
   const renderFan = () =>
@@ -454,7 +467,7 @@ const MovieDeck: React.FC<Props> = ({
         key={movie.title}
         movie={movie}
         index={i}
-        total={movies.length}
+        offset={effectiveOffset}
         isHovered={hoveredIndex === i}
         isActive={activeIndex === i && isShuffling}
         isWinner={winnerMovie?.title === movie.title && !isShuffling}
@@ -807,17 +820,39 @@ const MovieDeck: React.FC<Props> = ({
                             >
                               {winnerMovie.title}
                             </p>
-                            {winnerMovie.year && (
-                              <p
+                            {(winnerMovie.year || winnerMovie.rating) && (
+                              <div
                                 style={{
-                                  fontSize: '0.9rem',
-                                  color: 'var(--color-text-secondary)',
-                                  fontWeight: 500,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  gap: '10px',
                                   marginTop: '4px',
                                 }}
                               >
-                                {winnerMovie.year}
-                              </p>
+                                {winnerMovie.year && (
+                                  <span
+                                    style={{
+                                      fontSize: '0.9rem',
+                                      color: 'var(--color-text-secondary)',
+                                      fontWeight: 500,
+                                    }}
+                                  >
+                                    {winnerMovie.year}
+                                  </span>
+                                )}
+                                {winnerMovie.rating && (
+                                  <span
+                                    style={{
+                                      fontSize: '0.9rem',
+                                      color: 'var(--color-green)',
+                                      fontWeight: 700,
+                                    }}
+                                  >
+                                    ★ {winnerMovie.rating.toFixed(1)}
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </div>
 
