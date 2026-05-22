@@ -16,6 +16,7 @@ import { enrichAllMovies } from './utils/tmdb';
 const STORAGE_KEY = 'watchlist';
 const DECK_KEY = 'deck';
 const DECK_ENABLED_KEY = 'deckEnabled';
+const MAX_DECK_SIZE = 10;
 const APP_VERSION = import.meta.env.PACKAGE_VERSION;
 
 function loadFromStorage<T>(key: string): T | null {
@@ -231,6 +232,7 @@ const App: React.FC = () => {
                 deckEnabled={deckEnabled}
                 shuffleActive={shuffleActive}
                 lastPick={lastPick}
+                deckFull={deck.length >= MAX_DECK_SIZE}
               />
 
               {deckEnabled && (
