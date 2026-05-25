@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
 
-import logo from '/CueMovie_temp_logo.png';
+import logo from '/CueMovie_transparent.png';
 
 type Category = 'Bug report' | 'Feature idea' | 'General';
 type Status = 'idle' | 'submitting' | 'success' | 'error';
