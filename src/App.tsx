@@ -8,6 +8,7 @@ import MovieDeck from './components/MovieDeck';
 import MovieFilters from './components/MovieFilters';
 import MovieModal from './components/MovieModal';
 import MoviePicker from './components/MoviePicker';
+import SupportButton from './components/SupportButton';
 import TMDBAttribution from './components/TMDBAttribution';
 import TonightsPick from './components/TonightsPick';
 import type { FilterOptions, Movie } from './types';
@@ -305,13 +306,15 @@ const App: React.FC = () => {
       <footer
         style={{
           borderTop: '1px solid var(--color-border)',
-          padding: '20px 24px',
+          padding: '20px 20px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          rowGap: '12px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <p
             style={{
               fontSize: '0.8rem',
@@ -330,6 +333,8 @@ const App: React.FC = () => {
           />
           <TMDBAttribution />
         </div>
+
+        <SupportButton />
       </footer>
     </div>
   );
