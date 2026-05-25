@@ -3,13 +3,35 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import logo from '/CueMovie_transparent.png';
 
-type Category = 'Bug report' | 'Feature idea' | 'General';
+type Category = 'Bug Report' | 'Feature Idea' | 'General';
 type Status = 'idle' | 'submitting' | 'success' | 'error';
 
-const CATEGORIES: Category[] = ['Bug report', 'Feature idea', 'General'];
+const CATEGORIES: Category[] = ['Bug Report', 'Feature Idea', 'General'];
 
 const COLOR_TRANSITION =
   'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease';
+
+// Per-category colour tokens
+const CATEGORY_COLORS: Record<
+  Category,
+  { color: string; bg: string; border: string }
+> = {
+  'Bug Report': {
+    color: 'var(--color-danger)',
+    bg: 'rgba(229,83,83,0.1)',
+    border: 'var(--color-danger)',
+  },
+  'Feature Idea': {
+    color: 'var(--color-blue)',
+    bg: 'rgba(64,188,244,0.1)',
+    border: 'var(--color-blue)',
+  },
+  General: {
+    color: 'var(--color-accent)',
+    bg: 'rgba(255,128,0,0.1)',
+    border: 'var(--color-accent)',
+  },
+};
 
 const inputBase: React.CSSProperties = {
   width: '100%',
@@ -17,8 +39,8 @@ const inputBase: React.CSSProperties = {
   border: '1px solid var(--color-border)',
   borderRadius: '8px',
   color: 'var(--color-text)',
-  fontSize: '0.9rem',
-  fontWeight: 500,
+  fontSize: '0.82rem',
+  fontWeight: 400,
   fontFamily: 'var(--font-body)',
   outline: 'none',
   transition: COLOR_TRANSITION,
@@ -26,15 +48,15 @@ const inputBase: React.CSSProperties = {
 
 const FocusInput = React.forwardRef<
   HTMLInputElement,
-  React.InputHTMLAttributes<HTMLInputElement>
->((props, ref) => (
+  React.InputHTMLAttributes<HTMLInputElement> & { focusColor?: string }
+>(({ focusColor = 'var(--color-accent)', ...props }, ref) => (
   <input
     ref={ref}
     {...props}
     style={{ ...inputBase, padding: '10px 14px', ...props.style }}
     onFocus={(e) => {
-      e.currentTarget.style.borderColor = 'var(--color-accent)';
-      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,128,0,0.08)';
+      e.currentTarget.style.borderColor = focusColor;
+      e.currentTarget.style.boxShadow = `0 0 0 3px color-mix(in srgb, ${focusColor} 12%, transparent)`;
       props.onFocus?.(e);
     }}
     onBlur={(e) => {
@@ -48,8 +70,8 @@ FocusInput.displayName = 'FocusInput';
 
 const FocusTextarea = React.forwardRef<
   HTMLTextAreaElement,
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>
->((props, ref) => (
+  React.TextareaHTMLAttributes<HTMLTextAreaElement> & { focusColor?: string }
+>(({ focusColor = 'var(--color-accent)', ...props }, ref) => (
   <textarea
     ref={ref}
     {...props}
@@ -62,8 +84,8 @@ const FocusTextarea = React.forwardRef<
       ...props.style,
     }}
     onFocus={(e) => {
-      e.currentTarget.style.borderColor = 'var(--color-accent)';
-      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255,128,0,0.08)';
+      e.currentTarget.style.borderColor = focusColor;
+      e.currentTarget.style.boxShadow = `0 0 0 3px color-mix(in srgb, ${focusColor} 12%, transparent)`;
       props.onFocus?.(e);
     }}
     onBlur={(e) => {
@@ -79,7 +101,7 @@ const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <p
     style={{
       fontSize: '0.72rem',
-      fontWeight: 700,
+      fontWeight: 600,
       letterSpacing: '0.08em',
       textTransform: 'uppercase',
       color: 'var(--color-text-secondary)',
@@ -148,7 +170,7 @@ const FeedbackButton: React.FC = () => {
     }
   };
 
-  const canSubmit = message.trim().length > 0 && status === 'idle';
+  const canSubmit = message.trim().length >= 10 && status === 'idle';
 
   return (
     <>
@@ -347,11 +369,10 @@ const FeedbackButton: React.FC = () => {
                         style={{
                           fontSize: '1rem',
                           fontWeight: 700,
-                          color: 'var(--color-accent)',
-                          letterSpacing: '-0.02em',
+                          color: 'var(--color-text)',
                         }}
                       >
-                        Share your thoughts with us
+                        Share your thoughts with us!
                       </p>
                       <p
                         style={{
@@ -360,7 +381,7 @@ const FeedbackButton: React.FC = () => {
                           marginTop: '2px',
                         }}
                       >
-                        Bug, idea, or just a note - all are welcome.
+                        Bug, idea, or just a question - all are welcome.
                       </p>
                     </div>
 
@@ -370,6 +391,7 @@ const FeedbackButton: React.FC = () => {
                       <div style={{ display: 'flex', gap: '8px' }}>
                         {CATEGORIES.map((cat) => {
                           const active = category === cat;
+                          const { color, bg, border } = CATEGORY_COLORS[cat];
                           return (
                             <button
                               key={cat}
@@ -378,12 +400,12 @@ const FeedbackButton: React.FC = () => {
                                 flex: 1,
                                 padding: '7px 4px',
                                 borderRadius: '8px',
-                                border: `1px solid ${active ? 'var(--color-accent)' : 'var(--color-border)'}`,
+                                border: `1px solid ${active ? border : 'var(--color-border)'}`,
                                 background: active
-                                  ? 'rgba(255,128,0,0.1)'
+                                  ? bg
                                   : 'var(--color-surface-2)',
                                 color: active
-                                  ? 'var(--color-accent)'
+                                  ? color
                                   : 'var(--color-text-secondary)',
                                 fontSize: '0.78rem',
                                 fontWeight: active ? 700 : 500,
@@ -408,7 +430,18 @@ const FeedbackButton: React.FC = () => {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         disabled={status === 'submitting'}
+                        focusColor={CATEGORY_COLORS[category].color}
                       />
+                      <p
+                        style={{
+                          fontSize: '0.72rem',
+                          fontWeight: 500,
+                          marginTop: '5px',
+                          color: 'var(--color-muted)',
+                        }}
+                      >
+                        Minimum 10 characters.
+                      </p>
                     </div>
 
                     {/* Email (optional) */}
@@ -420,6 +453,7 @@ const FeedbackButton: React.FC = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         disabled={status === 'submitting'}
+                        focusColor={CATEGORY_COLORS[category].color}
                       />
                     </div>
 
@@ -459,7 +493,7 @@ const FeedbackButton: React.FC = () => {
                         transition: COLOR_TRANSITION,
                       }}
                     >
-                      {status === 'submitting' ? 'Sending…' : 'Send feedback'}
+                      {status === 'submitting' ? 'Sending…' : 'Send Feedback'}
                     </button>
                   </motion.div>
                 )}
