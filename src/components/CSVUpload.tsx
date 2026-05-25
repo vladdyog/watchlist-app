@@ -9,6 +9,7 @@ type Props = {
   progress: { completed: number; total: number } | null;
   enrichmentTime: number | null;
   onMoviesLoaded: (movies: Movie[]) => void;
+  onExport?: () => void;
   onError: (error: string) => void;
 };
 
@@ -179,6 +180,7 @@ const CSVUpload: React.FC<Props> = ({
   progress,
   enrichmentTime,
   onMoviesLoaded,
+  onExport,
   onError,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -186,8 +188,6 @@ const CSVUpload: React.FC<Props> = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Smooth progress — RAF loop that chases the real value each frame.
-  // Each tick moves 10% of the remaining gap, so it naturally eases in on
-  // big batch jumps and coasts fluidly between them instead of stalling.
   const [smoothPct, setSmoothPct] = useState(0);
   const targetPctRef = useRef(0);
 
@@ -384,80 +384,115 @@ const CSVUpload: React.FC<Props> = ({
   // Loaded
   if (movieCount > 0) {
     return (
-      <div
-        onClick={() => inputRef.current?.click()}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        style={{
-          ...cardStyle,
-          padding: '16px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div
+      <div>
+        {/* Main card — clicking replaces the list */}
+        <div
+          onClick={() => inputRef.current?.click()}
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          style={{
+            ...cardStyle,
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                background: 'rgba(255,128,0,0.12)',
+                border: '1px solid rgba(255,128,0,0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--color-accent)',
+                fontSize: '1rem',
+                flexShrink: 0,
+              }}
+            >
+              ✓
+            </div>
+            <div>
+              <p
+                style={{
+                  fontSize: '0.95rem',
+                  fontWeight: 700,
+                  color: 'var(--color-text)',
+                }}
+              >
+                Watchlist Loaded
+              </p>
+              <p
+                style={{
+                  fontSize: '0.8rem',
+                  color: 'var(--color-text-secondary)',
+                  marginTop: '2px',
+                  fontWeight: 500,
+                }}
+              >
+                {movieCount} films
+                {enrichmentTime != null
+                  ? ` · enriched in ${enrichmentTime.toFixed(1)}s`
+                  : ''}
+              </p>
+            </div>
+          </div>
+          <span
             style={{
-              width: 36,
-              height: 36,
-              borderRadius: '50%',
-              background: 'rgba(255,128,0,0.12)',
-              border: '1px solid rgba(255,128,0,0.3)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--color-accent)',
-              fontSize: '1rem',
+              fontSize: '0.8rem',
+              color: 'var(--color-muted)',
+              fontWeight: 600,
               flexShrink: 0,
             }}
           >
-            ✓
-          </div>
-          <div>
-            <p
-              style={{
-                fontSize: '0.95rem',
-                fontWeight: 700,
-                color: 'var(--color-text)',
-              }}
-            >
-              Watchlist loaded
-            </p>
-            <p
-              style={{
-                fontSize: '0.8rem',
-                color: 'var(--color-text-secondary)',
-                marginTop: '2px',
-                fontWeight: 500,
-              }}
-            >
-              {movieCount} films
-              {enrichmentTime != null
-                ? ` · enriched in ${enrichmentTime.toFixed(1)}s`
-                : ''}
-            </p>
-          </div>
+            Click to Replace
+          </span>
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".csv"
+            onChange={handleFileChange}
+            className="hidden"
+          />
         </div>
-        <span
-          style={{
-            fontSize: '0.8rem',
-            color: 'var(--color-muted)',
-            fontWeight: 600,
-            flexShrink: 0,
-          }}
-        >
-          Click to replace
-        </span>
-        <input
-          ref={inputRef}
-          type="file"
-          accept=".csv"
-          onChange={handleFileChange}
-          className="hidden"
-        />
+
+        {/* Download link — only shown when a handler is wired up */}
+        {onExport && (
+          <div style={{ marginTop: '10px', textAlign: 'center' }}>
+            <button
+              onClick={onExport}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                fontFamily: 'var(--font-body)',
+                color: 'var(--color-muted)',
+                transition: 'color 0.15s',
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = 'var(--color-text-secondary)')
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = 'var(--color-muted)')
+              }
+            >
+              <span style={{ fontSize: '0.75rem' }}>↓</span>
+              Download Current List
+            </button>
+          </div>
+        )}
       </div>
     );
   }

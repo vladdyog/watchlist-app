@@ -732,7 +732,7 @@ const MovieDeck: React.FC<Props> = ({
                     >
                       Esc
                     </kbd>{' '}
-                    or click ✕ to close
+                    to Close
                   </p>
                 </motion.div>
               ) : (
@@ -870,7 +870,7 @@ const MovieDeck: React.FC<Props> = ({
                                 boxShadow: '0 0 24px rgba(255,128,0,0.3)',
                               }}
                             >
-                              Watch this!
+                              Watch This!
                             </button>
                             <button
                               onClick={handleEliminate}
@@ -894,7 +894,7 @@ const MovieDeck: React.FC<Props> = ({
                                   'var(--color-text-secondary)';
                               }}
                             >
-                              Eliminate & shuffle again
+                              Eliminate & Shuffle Again
                             </button>
                           </div>
                         </motion.div>

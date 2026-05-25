@@ -1,16 +1,17 @@
 import { Analytics } from '@vercel/analytics/react';
+import { AnimatePresence } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 
 import CSVUpload from './components/CSVUpload';
 import FeedbackButton from './components/FeedbackButton';
-import MovieCard from './components/MovieCard';
 import MovieDeck from './components/MovieDeck';
 import MovieFilters from './components/MovieFilters';
 import MovieModal from './components/MovieModal';
 import MoviePicker from './components/MoviePicker';
 import TMDBAttribution from './components/TMDBAttribution';
+import TonightsPick from './components/TonightsPick';
 import type { FilterOptions, Movie } from './types';
-import { filterMovies } from './utils';
+import { exportWatchlistCSV, filterMovies } from './utils';
 import { enrichAllMovies } from './utils/tmdb';
 
 const STORAGE_KEY = 'watchlist';
@@ -92,6 +93,11 @@ const App: React.FC = () => {
     setDeck([]);
   };
 
+  const handleRemoveMovie = (movie: Movie) => {
+    setMovies((prev) => prev.filter((m) => m.title !== movie.title));
+    setLastPick((prev) => (prev?.title === movie.title ? null : prev));
+  };
+
   const isEnriching = progress !== null;
   const filteredMovies = filterMovies(movies, filters);
 
@@ -157,6 +163,7 @@ const App: React.FC = () => {
             progress={progress}
             enrichmentTime={enrichmentTime}
             onMoviesLoaded={handleMoviesLoaded}
+            onExport={() => exportWatchlistCSV(movies)}
             onError={setError}
           />
           {error && (
@@ -229,6 +236,7 @@ const App: React.FC = () => {
               <MoviePicker
                 movies={filteredMovies}
                 onMoviePicked={handleMoviePicked}
+                onRemoveMovie={handleRemoveMovie}
                 deckEnabled={deckEnabled}
                 shuffleActive={shuffleActive}
                 lastPick={lastPick}
@@ -251,7 +259,7 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              {/* Deck mode last pick — same layout as normal mode */}
+              {/* Tonight's Pick — deck mode */}
               {deckEnabled && lastPick && !shuffleActive && (
                 <div
                   style={{
@@ -259,66 +267,16 @@ const App: React.FC = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '0',
                   }}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      marginBottom: '14px',
-                      width: '100%',
-                      maxWidth: '420px',
-                    }}
-                  >
-                    <div
-                      style={{
-                        flex: 1,
-                        height: '1px',
-                        background: 'var(--color-border)',
-                      }}
+                  <AnimatePresence>
+                    <TonightsPick
+                      key={lastPick.title}
+                      movie={lastPick}
+                      onCardClick={() => setShowDeckWinnerModal(true)}
+                      onRemove={handleRemoveMovie}
                     />
-                    <p
-                      style={{
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.1em',
-                        textTransform: 'uppercase',
-                        color: 'var(--color-accent)',
-                      }}
-                    >
-                      Tonight's Pick
-                    </p>
-                    <div
-                      style={{
-                        flex: 1,
-                        height: '1px',
-                        background: 'var(--color-border)',
-                      }}
-                    />
-                  </div>
-                  <div
-                    style={{
-                      width: '100%',
-                      maxWidth: '420px',
-                      cursor: 'pointer',
-                    }}
-                    onClick={() => setShowDeckWinnerModal(true)}
-                  >
-                    <MovieCard movie={lastPick} compact />
-                  </div>
-                  <p
-                    style={{
-                      textAlign: 'center',
-                      fontSize: '0.8rem',
-                      color: 'var(--color-muted)',
-                      marginTop: '10px',
-                      fontWeight: 500,
-                    }}
-                  >
-                    Click to expand
-                  </p>
+                  </AnimatePresence>
                 </div>
               )}
 
