@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import logo from '/CueMovie_transparent.png';
 
-const BMAC_URL = 'https://buymeacoffee.com/YOUR_USERNAME'; // 👈 replace this
+const BMAC_URL = 'https://buymeacoffee.com/cuemovie';
 
 const COLOR_TRANSITION =
   'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease';
