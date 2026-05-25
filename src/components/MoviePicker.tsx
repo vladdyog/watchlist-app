@@ -2,12 +2,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 
 import type { Movie } from '../types';
-import MovieCard from './MovieCard';
 import MovieModal from './MovieModal';
+import TonightsPick from './TonightsPick';
 
 type Props = {
   movies: Movie[];
   onMoviePicked?: (movie: Movie) => void;
+  onRemoveMovie?: (movie: Movie) => void;
   deckEnabled?: boolean;
   shuffleActive?: boolean;
   lastPick: Movie | null;
@@ -17,6 +18,7 @@ type Props = {
 const MoviePicker: React.FC<Props> = ({
   movies,
   onMoviePicked,
+  onRemoveMovie,
   deckEnabled,
   shuffleActive,
   lastPick,
@@ -73,116 +75,59 @@ const MoviePicker: React.FC<Props> = ({
         </div>
       ) : (
         !shuffleActive && (
-          <>
-            <motion.button
-              onClick={pickRandom}
-              disabled={deckEnabled && deckFull}
-              whileHover={!deckFull ? { scale: 1.04 } : {}}
-              whileTap={!deckFull ? { scale: 0.96 } : {}}
-              transition={{ type: 'spring', stiffness: 380, damping: 22 }}
-              style={{
-                padding: deckEnabled ? '13px 32px' : '17px 56px',
-                borderRadius: '50px',
-                border: 'none',
-                background: deckEnabled
-                  ? deckFull
-                    ? 'var(--color-surface-2)'
-                    : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)'
-                  : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
-                color: deckEnabled && deckFull ? 'var(--color-muted)' : 'white',
-                fontSize: deckEnabled ? '0.9rem' : '1.1rem',
-                fontWeight: 700,
-                fontFamily: 'var(--font-body)',
-                cursor: deckEnabled && deckFull ? 'default' : 'pointer',
-                letterSpacing: '-0.01em',
-                boxShadow: deckEnabled
-                  ? deckFull
-                    ? 'none'
-                    : '0 0 24px rgba(255,128,0,0.25), 0 4px 16px rgba(255,128,0,0.15)'
-                  : '0 0 40px rgba(255,128,0,0.3), 0 8px 24px rgba(255,128,0,0.2)',
-              }}
-            >
-              {label}
-            </motion.button>
-          </>
+          <motion.button
+            onClick={pickRandom}
+            disabled={deckEnabled && deckFull}
+            whileHover={!deckFull ? { scale: 1.04 } : {}}
+            whileTap={!deckFull ? { scale: 0.96 } : {}}
+            transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+            style={{
+              padding: deckEnabled ? '13px 32px' : '17px 56px',
+              borderRadius: '50px',
+              border: 'none',
+              background: deckEnabled
+                ? deckFull
+                  ? 'var(--color-surface-2)'
+                  : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)'
+                : 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-hover) 100%)',
+              color: deckEnabled && deckFull ? 'var(--color-muted)' : 'white',
+              fontSize: deckEnabled ? '0.9rem' : '1.1rem',
+              fontWeight: 700,
+              fontFamily: 'var(--font-body)',
+              cursor: deckEnabled && deckFull ? 'default' : 'pointer',
+              letterSpacing: '-0.01em',
+              boxShadow: deckEnabled
+                ? deckFull
+                  ? 'none'
+                  : '0 0 24px rgba(255,128,0,0.25), 0 4px 16px rgba(255,128,0,0.15)'
+                : '0 0 40px rgba(255,128,0,0.3), 0 8px 24px rgba(255,128,0,0.2)',
+            }}
+          >
+            {label}
+          </motion.button>
         )
       )}
 
-      {/* Modal */}
-      {showModal && lastPick && (
-        <MovieModal movie={lastPick} onClose={() => setShowModal(false)} />
-      )}
-
-      {/* Last pick — normal mode */}
+      {/* Tonight's Pick — normal mode only */}
       {!deckEnabled && (
         <AnimatePresence>
-          {lastPick && !showModal && (
-            <motion.div
+          {lastPick && (
+            <TonightsPick
               key={lastPick.title}
-              style={{ width: '100%', maxWidth: '420px' }}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 12 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-            >
-              {/* Label */}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '14px',
-                }}
-              >
-                <div
-                  style={{
-                    flex: 1,
-                    height: '1px',
-                    background: 'var(--color-border)',
-                  }}
-                />
-                <p
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.1em',
-                    textTransform: 'uppercase',
-                    color: 'var(--color-accent)',
-                  }}
-                >
-                  Tonight's Pick
-                </p>
-                <div
-                  style={{
-                    flex: 1,
-                    height: '1px',
-                    background: 'var(--color-border)',
-                  }}
-                />
-              </div>
-
-              <div
-                style={{ cursor: 'pointer' }}
-                onClick={() => setShowModal(true)}
-              >
-                <MovieCard movie={lastPick} compact />
-              </div>
-
-              <p
-                style={{
-                  textAlign: 'center',
-                  fontSize: '0.8rem',
-                  color: 'var(--color-muted)',
-                  marginTop: '10px',
-                  fontWeight: 500,
-                }}
-              >
-                Click to expand
-              </p>
-            </motion.div>
+              movie={lastPick}
+              onCardClick={() => setShowModal(true)}
+              onRemove={onRemoveMovie}
+            />
           )}
         </AnimatePresence>
       )}
+
+      {/* Modal — only ever shown in normal mode */}
+      <AnimatePresence>
+        {!deckEnabled && showModal && lastPick && (
+          <MovieModal movie={lastPick} onClose={() => setShowModal(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

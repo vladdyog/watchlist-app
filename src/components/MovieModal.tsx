@@ -123,7 +123,7 @@ const MovieModal: React.FC<Props> = ({ movie, onClose }) => {
             >
               Esc
             </kbd>{' '}
-            or click outside to close
+            or Click Outside to Close
           </p>
         </motion.div>
       </motion.div>
