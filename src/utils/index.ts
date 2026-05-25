@@ -128,3 +128,35 @@ export function parseCSV(file: File): Promise<ParseCSVResult> {
     });
   });
 }
+
+/**
+ * Exports the current movie list as a CSV file and triggers a browser download.
+ *
+ * The output uses simple Title / Year / Date columns — enough for CueMovie to
+ * re-import and re-enrich from scratch. This means it also round-trips cleanly
+ * regardless of whether the original file came from IMDb or Letterboxd.
+ */
+export function exportWatchlistCSV(movies: Movie[]): void {
+  const rows = movies.map((m) => ({
+    Name: m.title,
+    Year: m.year ?? '',
+  }));
+
+  const now = new Date();
+  const timestamp = now
+    .toLocaleString('sv') // "YYYY-MM-DD HH:MM:SS" — ISO-like, locale-independent
+    .replace(' ', '_')
+    .replace(/:/g, '-');
+
+  const csv = Papa.unparse(rows, { header: true });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `watchlist_${timestamp}.csv`;
+  link.click();
+
+  // Clean up the object URL shortly after — the download starts immediately
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
