@@ -12,7 +12,7 @@ function detectSource(headers: string[]): CSVSource {
   return 'unknown';
 }
 
-// Only extracts title, year, and dateAdded — everything else comes from TMDb
+// Only extracts title, year, and dateAdded - everything else comes from TMDb
 export function normalizeMovies(rows: Record<string, string>[]): Movie[] {
   if (rows.length === 0) return [];
 
@@ -132,7 +132,7 @@ export function parseCSV(file: File): Promise<ParseCSVResult> {
 /**
  * Exports the current movie list as a CSV file and triggers a browser download.
  *
- * The output uses simple Title / Year / Date columns — enough for CueMovie to
+ * The output uses simple Title / Year / Date columns - enough for CueMovie to
  * re-import and re-enrich from scratch. This means it also round-trips cleanly
  * regardless of whether the original file came from IMDb or Letterboxd.
  */
@@ -144,7 +144,7 @@ export function exportWatchlistCSV(movies: Movie[]): void {
 
   const now = new Date();
   const timestamp = now
-    .toLocaleString('sv') // "YYYY-MM-DD HH:MM:SS" — ISO-like, locale-independent
+    .toLocaleString('sv') // "YYYY-MM-DD HH:MM:SS" - ISO-like, locale-independent
     .replace(' ', '_')
     .replace(/:/g, '-');
 
@@ -157,6 +157,6 @@ export function exportWatchlistCSV(movies: Movie[]): void {
   link.download = `watchlist_${timestamp}.csv`;
   link.click();
 
-  // Clean up the object URL shortly after — the download starts immediately
+  // Clean up the object URL shortly after - the download starts immediately
   setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }

@@ -260,7 +260,7 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              {/* Tonight's Pick — deck mode */}
+              {/* Tonight's Pick - deck mode */}
               {deckEnabled && lastPick && !shuffleActive && (
                 <div
                   style={{
@@ -359,7 +359,7 @@ const SectionLabel: React.FC<{
   </h2>
 );
 
-/* Deck mode toggle — knob + label only, no surrounding border or background */
+/* Deck mode toggle - knob + label only, no surrounding border or background */
 const DeckToggle: React.FC<{ enabled: boolean; onToggle: () => void }> = ({
   enabled,
   onToggle,

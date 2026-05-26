@@ -25,7 +25,7 @@ function nextState(current: GenreState): GenreState {
   return 'neutral';
 }
 
-// Only transition color-related properties — never layout — to avoid size-change jank on reset
+// Only transition color-related properties - never layout - to avoid size-change jank on reset
 const COLOR_TRANSITION =
   'background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease';
 
@@ -215,7 +215,7 @@ const MovieFilters: React.FC<Props> = ({ movies, filters, onChange }) => {
         </div>
       </div>
 
-      {/* Genre pills — tri-state, color-only transitions (no layout shift on reset) */}
+      {/* Genre pills - tri-state, color-only transitions (no layout shift on reset) */}
       {genres.length > 0 && (
         <div>
           <div

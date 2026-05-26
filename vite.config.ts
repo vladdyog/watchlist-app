@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
-    base: process.env.VERCEL ? '/' : '/watchlist-app/',
+    base: process.env.VERCEL ? '/' : '/cuemovie/',
     plugins: [react(), tailwindcss()],
     define: {
       'import.meta.env.PACKAGE_VERSION': JSON.stringify(packageJson.version),

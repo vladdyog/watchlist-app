@@ -108,7 +108,7 @@ const MoviePicker: React.FC<Props> = ({
         )
       )}
 
-      {/* Tonight's Pick — normal mode only */}
+      {/* Tonight's Pick - normal mode only */}
       {!deckEnabled && (
         <AnimatePresence>
           {lastPick && (
@@ -122,7 +122,7 @@ const MoviePicker: React.FC<Props> = ({
         </AnimatePresence>
       )}
 
-      {/* Modal — only ever shown in normal mode */}
+      {/* Modal - only ever shown in normal mode */}
       <AnimatePresence>
         {!deckEnabled && showModal && lastPick && (
           <MovieModal movie={lastPick} onClose={() => setShowModal(false)} />

@@ -3,14 +3,14 @@ import type { Movie } from '../types';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w500';
 
 // ---------------------------------------------------------------------------
-// Rate limiter — sliding window, 40 req/s
+// Rate limiter - sliding window, 40 req/s
 //
 // TMDB's documented limit is 40 requests per 10 s. Their CDN enforces a
-// harder ceiling of ~50 req/s. We target 40 req/s — a comfortable margin
+// harder ceiling of ~50 req/s. We target 40 req/s - a comfortable margin
 // below the CDN cap while respecting the spirit of the documented limit.
 //
 // JS is single-threaded: the check-and-push in waitForRateLimit() is
-// effectively atomic — no race condition is possible between concurrent
+// effectively atomic - no race condition is possible between concurrent
 // async callers.
 // ---------------------------------------------------------------------------
 const RATE_WINDOW_MS = 1_000;
@@ -40,7 +40,7 @@ async function waitForRateLimit(): Promise<void> {
 //
 // In development, requests to /api/tmdbFunction are intercepted by Vite's
 // proxy (configured in vite.config.ts), which forwards them to TMDB and
-// injects the Authorization header server-side — so the token never reaches
+// injects the Authorization header server-side - so the token never reaches
 // the browser in either environment.
 // ---------------------------------------------------------------------------
 async function tmdbFetch(
@@ -141,11 +141,11 @@ export async function enrichMovie(movie: Movie): Promise<TMDbEnrichment> {
 }
 
 // ---------------------------------------------------------------------------
-// Bulk enrichment — concurrent worker pool, paced by the rate limiter
+// Bulk enrichment - concurrent worker pool, paced by the rate limiter
 //
 // Workers pull from a shared index and each call enrichMovie(), which makes
 // 2 requests (search + details) both routed through waitForRateLimit().
-// Having more workers than the per-second budget is fine — extras simply
+// Having more workers than the per-second budget is fine - extras simply
 // wait their turn. This replaces the old fixed-batch loop, which fired a
 // full batch instantly and had no pacing between batches.
 // ---------------------------------------------------------------------------

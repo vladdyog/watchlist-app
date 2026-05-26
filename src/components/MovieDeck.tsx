@@ -69,7 +69,7 @@ const PosterCard: React.FC<{
     glow = '0 0 16px rgba(255,128,0,0.25), 0 6px 20px rgba(0,0,0,0.4)';
   }
 
-  // Winner card: no info overlay — title/year are shown below the fan instead.
+  // Winner card: no info overlay - title/year are shown below the fan instead.
   // Non-winner hovered card: show info overlay as usual.
   const showInfo = isHovered && !isShuffling && !isWinner;
 
@@ -258,7 +258,7 @@ const PosterCard: React.FC<{
           </AnimatePresence>
         </div>
 
-        {/* ── Back — opaque ── */}
+        {/* ── Back - opaque ── */}
         <div
           style={{
             position: 'absolute',
@@ -330,7 +330,7 @@ const MovieDeck: React.FC<Props> = ({
   const animRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
-  // Escape key — works both in shuffle state and winner reveal state
+  // Escape key - works both in shuffle state and winner reveal state
   useEffect(() => {
     if (!shuffleActive) return;
     const handler = (e: KeyboardEvent) => {
@@ -672,7 +672,7 @@ const MovieDeck: React.FC<Props> = ({
 
             <AnimatePresence mode="wait">
               {watchAccepted && winnerMovie ? (
-                /* ── Winner reveal — same max-width as MovieModal (380px) ── */
+                /* ── Winner reveal - same max-width as MovieModal (380px) ── */
                 <motion.div
                   key="reveal"
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}

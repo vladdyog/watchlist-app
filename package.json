@@ -1,11 +1,11 @@
 {
-  "name": "watchlist-app",
-  "version": "0.7.0",
+  "name": "cuemovie",
+  "version": "0.8.0",
   "private": true,
   "author": "vladdyog",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vladdyog/watchlist-app.git"
+    "url": "https://github.com/vladdyog/cuemovie.git"
   },
   "type": "module",
   "scripts": {

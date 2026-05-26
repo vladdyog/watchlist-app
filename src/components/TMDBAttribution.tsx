@@ -25,7 +25,7 @@ const TmdbAttribution: React.FC = () => {
       {/* ── Footer trigger: TMDB logo ──────────────────────────────────── */}
       <button
         onClick={() => setOpen(true)}
-        aria-label="Data attribution — powered by TMDB"
+        aria-label="Data attribution - powered by TMDB"
         title="Data attribution"
         style={{
           display: 'flex',
