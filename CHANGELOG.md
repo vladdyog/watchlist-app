@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.8.0] - 2026-05-26
 
-### What's New
+### Additions
 
 - **Feedback form** - a floating button lets users submit bug reports, feature ideas,
   or general feedback without leaving the app. Optionally include an email for follow-up.
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [v0.7.0] - 2026-05-01
 
-### What's New
+### Additions
 
 - Genre exclusion filtering - exclude specific genres from your list.
 - In-app guidance on how to export watchlists from IMDb and Letterboxd.
@@ -68,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 First working end-to-end release, published under the name **CueMovie**.
 
-### What's New
+### Additions
 
 - Upload CSV watchlists from IMDb or Letterboxd, with automatic format detection.
 - TMDb enrichment - each movie is supplemented with rating, genres, runtime,
