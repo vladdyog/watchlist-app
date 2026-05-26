@@ -14,7 +14,7 @@ type Props = {
 };
 
 const ENRICHING_MESSAGES = [
-  "Sit back and relax — we're gathering info on your watchlist...",
+  "Sit back and relax - we're gathering info on your watchlist...",
   'Good taste detected! Fetching all the details...',
   "Hold tight! We're looking up your movies...",
   'Consulting the cinema archives...',
@@ -187,7 +187,7 @@ const CSVUpload: React.FC<Props> = ({
   const [isParsing, setIsParsing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Smooth progress — RAF loop that chases the real value each frame.
+  // Smooth progress - RAF loop that chases the real value each frame.
   const [smoothPct, setSmoothPct] = useState(0);
   const targetPctRef = useRef(0);
 
@@ -385,7 +385,7 @@ const CSVUpload: React.FC<Props> = ({
   if (movieCount > 0) {
     return (
       <div>
-        {/* Main card — clicking replaces the list */}
+        {/* Main card - clicking replaces the list */}
         <div
           onClick={() => inputRef.current?.click()}
           onDrop={handleDrop}
@@ -462,7 +462,7 @@ const CSVUpload: React.FC<Props> = ({
           />
         </div>
 
-        {/* Download link — only shown when a handler is wired up */}
+        {/* Download link - only shown when a handler is wired up */}
         {onExport && (
           <div style={{ marginTop: '10px', textAlign: 'center' }}>
             <button

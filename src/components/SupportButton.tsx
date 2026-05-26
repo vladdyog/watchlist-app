@@ -194,7 +194,7 @@ const SupportButton: React.FC = () => {
                 }}
               />
 
-              {/* CTA — solid blue, brightens on hover */}
+              {/* CTA - solid blue, brightens on hover */}
               <a
                 href={BMAC_URL}
                 target="_blank"

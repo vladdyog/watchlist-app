@@ -245,7 +245,7 @@ const FeedbackButton: React.FC = () => {
             }}
             transition={{ duration: 0.2 }}
           >
-            {/* Backdrop — catches outside clicks */}
+            {/* Backdrop - catches outside clicks */}
             <div
               onClick={handleClose}
               style={{ position: 'absolute', inset: 0, cursor: 'default' }}
