@@ -33,7 +33,7 @@ export default async function handler(
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
-        Referer: 'https://watchlist-app.vercel.app',
+        Referer: 'https://cuemovie.app',
       },
       body,
     });
