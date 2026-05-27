@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [v0.8.1] - 2026-05-27
+
+### Additions
+
+- **SEO** - added meta description, Open Graph, and Twitter Card tags to improve
+  search engine visibility and social share previews (WhatsApp, iMessage, etc.).
+- **Sitemap** - added `sitemap.xml` and `robots.txt` to aid search engine crawling.
+- **Security headers** - added `vercel.json` with `X-Frame-Options`, `X-Content-Type-Options`,
+  `Referrer-Policy`, and `Permissions-Policy` headers across all routes.
+
+### Improvements
+
+- `tmdbFunction` now validates the `path` parameter against an allowlist,
+  preventing arbitrary TMDB endpoint access.
+- `feedbackFunction` now enforces a 10KB body size limit, validates
+  `Content-Type: application/json`, and rejects malformed JSON before forwarding.
+
+---
+
 ## [v0.8.0] - 2026-05-26
 
 ### Additions
