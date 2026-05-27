@@ -11,6 +11,13 @@ interface VercelResponse extends ServerResponse {
 
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 
+// Only the two paths the app actually needs — anything else is rejected.
+const ALLOWED_PATH_PREFIXES = ['/search/movie', '/movie/'];
+
+function isAllowedPath(path: string): boolean {
+  return ALLOWED_PATH_PREFIXES.some((prefix) => path.startsWith(prefix));
+}
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse,
@@ -24,6 +31,11 @@ export default async function handler(
   const path = req.query.path;
   if (!path || typeof path !== 'string') {
     res.status(400).json({ error: 'Missing path parameter' });
+    return;
+  }
+
+  if (!isAllowedPath(path)) {
+    res.status(403).json({ error: 'Forbidden' });
     return;
   }
 
