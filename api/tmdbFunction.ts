@@ -11,7 +11,7 @@ interface VercelResponse extends ServerResponse {
 
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 
-// Only the two paths the app actually needs — anything else is rejected.
+// Only the two paths the app actually needs - anything else is rejected.
 const ALLOWED_PATH_PREFIXES = ['/search/movie', '/movie/'];
 
 function isAllowedPath(path: string): boolean {
